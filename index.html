@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC Startup Hub — All-Department Meeting Tool</title>
+<style>
+:root{--navy:#131a22;--navy2:#232f3e;--orange:#ff9900;--ink:#2d3436;--muted:#6c757d;
+--green:#146c43;--blue:#0d6efd;--red:#dc3545;--purple:#6f42c1;--bg:#f4f6f8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Amazon Ember','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* ===== header ===== */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;padding:18px 24px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 4px 18px rgba(0,0,0,.25);position:sticky;top:0;z-index:50}
+.smile{width:74px;flex:none}
+.hdr h1{font-size:1.25rem;letter-spacing:.3px}
+.hdr .sub{font-size:.78rem;color:#ffffffaa;margin-top:2px}
+.hdr .date{margin-left:auto;text-align:right;font-size:.85rem;color:#ffd28a;font-weight:700}
+.hdr .date small{display:block;color:#ffffff88;font-weight:400}
+.backbtn{background:#ffffff18;border:1px solid #ffffff33;color:#fff;border-radius:10px;padding:9px 16px;
+  cursor:pointer;font-size:.9rem;font-weight:700;transition:.2s}
+.backbtn:hover{background:var(--orange);color:var(--navy);border-color:var(--orange)}
+
+/* ===== landing ===== */
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 80px}
+.intro{text-align:center;margin:10px auto 30px;max-width:720px}
+.intro h2{font-size:1.7rem;color:var(--navy)}
+.intro p{color:var(--muted);margin-top:8px;font-size:.98rem}
+.gtitle{display:flex;align-items:center;gap:12px;margin:34px 0 14px;font-size:.85rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:2px}
+.gtitle::after{content:"";flex:1;height:2px;background:currentColor;opacity:.18;border-radius:2px}
+.g-inbound{color:var(--green)}.g-stow{color:var(--blue)}.g-outbound{color:#c2410c}.g-support{color:var(--purple)}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px}
+.dcard{background:#fff;border-radius:16px;padding:20px 18px;cursor:pointer;border:2px solid transparent;
+  box-shadow:0 4px 14px rgba(19,26,34,.08);transition:transform .25s,box-shadow .25s,border-color .25s;
+  display:flex;align-items:center;gap:14px}
+.dcard:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(19,26,34,.16);border-color:var(--orange)}
+.dcard .em{font-size:1.9rem;flex:none}
+.dcard h3{font-size:1rem;color:var(--navy)}
+.dcard .es{font-size:.78rem;color:var(--muted);margin-top:2px}
+.dcard .accent{width:5px;align-self:stretch;border-radius:4px;flex:none;margin-right:2px}
+.acc-inbound{background:var(--green)}.acc-stow{background:var(--blue)}.acc-outbound{background:#c2410c}.acc-support{background:var(--purple)}
+
+/* ===== meeting view ===== */
+.mhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.mhead .em{font-size:2.3rem}
+.mhead h2{font-size:1.55rem;color:var(--navy)}
+.mhead .es-name{color:var(--muted);font-size:.9rem;margin-top:2px}
+.mgr{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:8px 14px;
+  box-shadow:0 3px 10px rgba(0,0,0,.07)}
+.mgr label{font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.mgr input{border:none;border-bottom:2px solid var(--orange);font-size:.95rem;font-weight:700;color:var(--navy);
+  padding:4px 2px;outline:none;width:170px;background:transparent}
+.datebar{background:var(--navy);color:#ffd28a;border-radius:12px;padding:10px 18px;font-weight:700;
+  font-size:.92rem;margin:14px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.datebar .shift{color:#fff}
+
+/* panels */
+.panel{background:#fff;border-radius:16px;padding:18px 20px;margin:14px 0;box-shadow:0 4px 14px rgba(19,26,34,.07)}
+.panel .ptitle{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--bg);border:2px solid transparent;border-radius:999px;
+  padding:8px 16px;cursor:pointer;font-size:.85rem;font-weight:700;color:var(--ink);transition:.2s;user-select:none}
+.chip:hover{border-color:var(--orange)}
+.chip.on{background:#fff3e0;border-color:var(--orange);color:#b45309}
+.chip input{display:none}
+
+/* stow floors */
+.floors{display:flex;flex-wrap:wrap;gap:10px}
+.floor{display:flex;align-items:center;gap:8px;background:var(--bg);border:2px solid transparent;
+  border-radius:12px;padding:8px 12px;font-weight:700;font-size:.85rem;cursor:pointer;user-select:none}
+.floor.on{background:#e7f1ff;border-color:var(--blue);color:#0a58ca}
+.floor input[type=checkbox]{display:none}
+.floor input[type=text]{width:56px;border:1.5px solid #ced4da;border-radius:8px;padding:4px 6px;font-size:.85rem;
+  font-weight:700;text-align:center;display:none}
+.floor.on input[type=text]{display:inline-block}
+
+/* meeting points split */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.col{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 14px rgba(19,26,34,.07)}
+.col .flag{font-size:.8rem;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--navy);
+  border-bottom:3px solid var(--orange);padding-bottom:8px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.pcardm{border-left:4px solid var(--orange);background:#fafbfc;border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:10px}
+.pcardm .cat{font-size:.66rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--orange);margin-bottom:5px}
+.pcardm .txt{font-size:.92rem;line-height:1.55}
+.pcardm.sit{border-left-color:var(--red);background:#fff5f5}
+.pcardm.sit .cat{color:var(--red)}
+.pcardm.floorinfo{border-left-color:var(--blue);background:#f0f7ff}
+.pcardm.floorinfo .cat{color:var(--blue)}
+
+/* note + actions */
+.note textarea{width:100%;border:1.5px dashed #ff990066;border-radius:10px;padding:12px;font-size:.9rem;
+  font-family:inherit;min-height:64px;resize:vertical;outline:none;background:#fffdf7}
+.actions{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.abtn{border:none;border-radius:12px;padding:12px 22px;font-size:.95rem;font-weight:800;cursor:pointer;transition:.2s}
+.abtn.print{background:var(--orange);color:var(--navy)}
+.abtn.print:hover{background:#e88b00}
+.abtn.shuffle{background:var(--navy2);color:#fff}
+.abtn.shuffle:hover{background:var(--navy)}
+
+.hidden{display:none!important}
+@media(max-width:760px){.split{grid-template-columns:1fr}.mgr{margin-left:0;width:100%}.hdr .date{margin-left:0}}
+@media print{
+  body{background:#fff}
+  .hdr,.panel.controls,.actions,.backbtn,.mgr input{box-shadow:none}
+  .hdr .backbtn,.actions,#landing,.panel.controls{display:none!important}
+  .split{grid-template-columns:1fr 1fr;gap:10px}
+  .col{box-shadow:none;border:1px solid #ddd;padding:12px}
+  .pcardm{page-break-inside:avoid}
+  .hdr{position:static;background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<!-- HEADER -->
+<div class="hdr">
+  <svg class="smile" viewBox="0 0 110 34" aria-label="amazon">
+    <text x="2" y="22" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="20" fill="#fff">amazon</text>
+    <path d="M12 26 Q46 38 88 24" stroke="#ff9900" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+    <path d="M88 24 l-6 -1.5 M88 24 l-4.5 4" stroke="#ff9900" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1 id="hdrTitle">FC Startup Hub</h1>
+    <div class="sub" id="hdrSub">Every department. One meeting tool. RDG1</div>
+  </div>
+  <div class="date" id="hdrDate"></div>
+  <button class="backbtn hidden" id="backBtn" onclick="goHome()">&#8592; All Departments</button>
+</div>
+
+<div class="wrap">
+
+  <!-- LANDING -->
+  <div id="landing">
+    <div class="intro">
+      <h2>Pick your department</h2>
+      <p>Tap a department to generate today's startup meeting — bilingual, print-ready, rotating fresh points every day. / Toque un departamento para generar la reunion de inicio de hoy.</p>
+    </div>
+    <div id="groups"></div>
+  </div>
+
+  <!-- MEETING VIEW -->
+  <div id="meeting" class="hidden">
+    <div class="mhead">
+      <span class="em" id="mEmoji"></span>
+      <div>
+        <h2 id="mName"></h2>
+        <div class="es-name" id="mNameEs"></div>
+      </div>
+      <div class="mgr">
+        <label for="mgrIn">Manager / PA</label>
+        <input id="mgrIn" type="text" placeholder="Write name...">
+      </div>
+    </div>
+
+    <div class="datebar"><span id="mDate"></span><span class="shift" id="mShift"></span></div>
+
+    <div class="panel controls" id="floorPanel">
+      <div class="ptitle">Active Floors &amp; Buffers / Pisos activos</div>
+      <div class="floors" id="floorRow"></div>
+    </div>
+
+    <div class="panel controls">
+      <div class="ptitle">Today's Situations / Situaciones de hoy — tap all that apply</div>
+      <div class="chips" id="chipRow"></div>
+    </div>
+
+    <div class="split" id="splitArea">
+      <div class="col">
+        <div class="flag">&#127482;&#127480; English</div>
+        <div id="ptsEn"></div>
+      </div>
+      <div class="col">
+        <div class="flag">&#127466;&#127480; Espanol</div>
+        <div id="ptsEs"></div>
+      </div>
+    </div>
+
+    <div class="panel note">
+      <div class="ptitle">Today's custom announcement / Anuncio de hoy (prints with the meeting)</div>
+      <textarea id="noteIn" placeholder="Type anything extra for today's meeting..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="abtn print" onclick="window.print()">&#128424; Print / Imprimir</button>
+      <button class="abtn shuffle" onclick="reshuffle()">&#8635; New Points / Nuevos Puntos</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== PORTED CONTENT: DECANT (verbatim from live tool) =====
+var DECANT_POOLS = {
+        SAFETY: [
+            { en: "Always wear your PPE: gloves and safety shoes are non-negotiable. Inspect your gloves for tears before starting.", es: "Siempre use su EPP: guantes y zapatos de seguridad son obligatorios. Inspeccione sus guantes antes de comenzar." },
+            { en: "Be aware of PIT traffic. Make eye contact with drivers before crossing any aisle.", es: "Este atento al trafico de PIT. Haga contacto visual con los conductores antes de cruzar cualquier pasillo." },
+            { en: "Keep your station clear of loose items. A clean station is a safe station.", es: "Mantenga su estacion libre de objetos sueltos. Una estacion limpia es una estacion segura." },
+            { en: "If you see something unsafe, report it immediately. Use ANDON or tell your PA.", es: "Si ve algo inseguro, reportelo inmediatamente. Use el ANDON o diga a su PA." },
+            { en: "Lift with your legs, not your back. For boxes over 50 lbs, use team lift.", es: "Levante con las piernas, no con la espalda. Para cajas de mas de 50 lbs, pida ayuda." },
+            { en: "Never reach into a box without looking first. Sharp objects and broken glass are real risks.", es: "Nunca meta la mano en una caja sin mirar primero. Objetos cortantes y vidrio roto son riesgos reales." },
+            { en: "Keep emergency exits clear at all times. Know your muster point.", es: "Mantenga las salidas de emergencia despejadas. Conozca su punto de reunion." },
+            { en: "Stay alert around conveyor belts. Tuck in loose clothing and lanyards.", es: "Mantengase alerta cerca de las bandas transportadoras. Meta la ropa suelta y cordones." },
+            { en: "Report any spills immediately, even water. Grab a cone and call AFM.", es: "Reporte cualquier derrame inmediatamente, incluso agua. Ponga un cono y llame a AFM." },
+            { en: "If your box cutter is out, retract the blade when not cutting. Never walk with an open blade.", es: "Si tiene un cutter, retraiga la cuchilla cuando no este cortando. Nunca camine con la cuchilla expuesta." },
+            { en: "Watch your posture throughout the shift. Repetitive strain builds up over days.", es: "Cuide su postura durante el turno. El estres repetitivo se acumula con los dias." },
+            { en: "Never stack totes above eye level. An unstable stack can fall on you or your neighbor.", es: "Nunca apile contenedores por encima del nivel de los ojos. Una pila inestable puede caer sobre usted." },
+            { en: "If equipment sounds wrong or jams, stop and report. Do not try to fix it yourself.", es: "Si el equipo suena raro o se traba, pare y reporte. No intente arreglarlo usted mismo." }
+        ],
+        QUALITY: [
+            { en: "Scan every item. Every missed scan is a phantom unit that hurts inventory accuracy.", es: "Escanee cada articulo. Cada escaneo perdido es una unidad fantasma que afecta el inventario." },
+            { en: "Check expiration dates on consumables. Expired items should never reach a customer.", es: "Revise fechas de vencimiento en productos consumibles. Articulos vencidos nunca deben llegar al cliente." },
+            { en: "Damaged items go in the damage tote. If you would not buy it, do not send it.", es: "Articulos danados van al contenedor de danos. Si usted no lo compraria, no lo envie." },
+            { en: "Match ASIN to bin location. A misplaced item is a lost item until cycle count.", es: "Verifique que el ASIN coincida con la ubicacion. Un articulo mal ubicado esta perdido hasta el conteo." },
+            { en: "Handle items with care. Tossing and dropping creates returns and concessions.", es: "Maneje los articulos con cuidado. Tirar y dejar caer crea devoluciones y concesiones." },
+            { en: "Check quantities match the PO. Short-ships create problems downstream for stow and pick.", es: "Verifique que las cantidades coincidan con la orden. Envios cortos crean problemas para almacenaje y recoleccion." },
+            { en: "No barcode or unreadable barcode? Do not guess. Set it aside for problem-solve.", es: "Sin codigo de barras o ilegible? No adivine. Apartelo para solucion de problemas." },
+            { en: "Watch for mixed ASINs in the same master carton. Vendors mislabel sometimes.", es: "Busque ASINs mezclados en la misma caja. Los proveedores a veces etiquetan mal." },
+            { en: "Keep labels facing outward in totes. It speeds up downstream processes.", es: "Mantenga las etiquetas hacia afuera en los contenedores. Acelera los procesos posteriores." },
+            { en: "If a box is water-damaged, inspect every item inside, not just the outer ones.", es: "Si una caja tiene dano por agua, inspeccione cada articulo adentro, no solo los de afuera." }
+        ],
+        PRODUCTIVITY: [
+            { en: "Grab one box at a time. Do not cherry-pick. Leave equal work for your peers.", es: "Tome una caja a la vez. No escoja las faciles. Deje trabajo equitativo para sus companeros." },
+            { en: "Stay in your zone. Do not self-direct. Moving without being told creates imbalances.", es: "Quedese en su zona. No se auto-dirija. Moverse sin instruccion crea desbalances." },
+            { en: "Minimize idle time. When you finish one box, the next should already be in hand.", es: "Minimice el tiempo muerto. Cuando termine una caja, la siguiente ya debe estar en su mano." },
+            { en: "If your workflow stops, raise your hand or hit ANDON. Do not stand waiting silently.", es: "Si su flujo se detiene, levante la mano o presione ANDON. No se quede esperando en silencio." },
+            { en: "Use both hands to keep pace. One holds the item, the other scans or places.", es: "Use ambas manos para mantener el ritmo. Una sostiene el articulo, la otra escanea o coloca." },
+            { en: "Keep supplies stocked before you start: labels, totes, bags. Running out kills momentum.", es: "Tenga sus suministros listos antes de empezar: etiquetas, contenedores, bolsas. Quedarse sin ellos mata el ritmo." },
+            { en: "Consistency beats bursts. A steady pace all shift is better than fast then slow.", es: "La consistencia gana a los arranques. Un ritmo estable todo el turno es mejor que rapido y luego lento." },
+            { en: "If your scanner is glitching, swap it immediately. A bad tool costs minutes every cycle.", es: "Si su escaner falla, cambielo de inmediato. Una herramienta mala cuesta minutos en cada ciclo." },
+            { en: "Focus on UPH but never at the cost of safety or quality. Fast and wrong is just wrong.", es: "Enfoquese en UPH pero nunca a costa de la seguridad o calidad. Rapido y mal hecho es solo mal hecho." },
+            { en: "Batch your actions: open flaps, scan, place. Find your most efficient sequence.", es: "Agrupe sus acciones: abra solapas, escanee, coloque. Encuentre su secuencia mas eficiente." }
+        ],
+        TEAMWORK: [
+            { en: "If a neighbors station is backed up, help them before their ANDON goes off.", es: "Si la estacion de un companero esta atrasada, ayudelo antes de que suene su ANDON." },
+            { en: "Communicate when you leave your station. Your PA needs to know for coverage.", es: "Comunique cuando deje su estacion. Su PA necesita saber para cubrir." },
+            { en: "Share supplies. If you have extra totes or labels, pass them to your neighbor.", es: "Comparta suministros. Si tiene contenedores o etiquetas extra, paselos a su vecino." },
+            { en: "New associates are watching you. Model the right behavior.", es: "Los asociados nuevos lo observan. Sea un modelo del comportamiento correcto." },
+            { en: "When shift ends, leave your station clean for the next person. That is respect.", es: "Cuando termine el turno, deje su estacion limpia para la siguiente persona. Eso es respeto." },
+            { en: "Volunteer to buddy new hires if you are experienced. It builds your leadership.", es: "Ofrezcarse a acompanar a nuevos si tiene experiencia. Eso desarrolla su liderazgo." },
+            { en: "Let your PA know if you want cross-training. Flexibility helps the whole team.", es: "Diga a su PA si quiere capacitacion cruzada. La flexibilidad ayuda a todo el equipo." },
+            { en: "Celebrate wins together. If the team hits rate, acknowledge it. Morale matters.", es: "Celebren los logros juntos. Si el equipo llega a la meta, reconozcanlo. La moral importa." },
+            { en: "Answer questions when peers ask. Nobody should feel afraid to speak up.", es: "Conteste preguntas cuando le pregunten. Nadie debe sentir miedo de hablar." },
+            { en: "Ask for assistance when needed. Asking is a strength, not a weakness.", es: "Pida ayuda cuando la necesite. Pedir es una fortaleza, no una debilidad." }
+        ],
+        ENGAGEMENT: [
+            { en: "The start-of-shift questionnaire is for YOUR feedback. Please answer honestly, do not just hit rather not answer. It helps us improve.", es: "El cuestionario al inicio del turno es para SU retroalimentacion. Responda honestamente, no solo presione prefiero no contestar. Nos ayuda a mejorar." },
+            { en: "Have ideas to improve the process? Tell your PA or use the VOA board. Good ideas get implemented.", es: "Tiene ideas para mejorar el proceso? Diga a su PA o use el tablero VOA. Las buenas ideas se implementan." },
+            { en: "Promotions happen from within. Consistency, safety, and engagement get noticed.", es: "Las promociones vienen de adentro. La consistencia, seguridad y compromiso se notan." },
+            { en: "Own your metrics. Check your dashboard. Knowing where you stand helps you improve.", es: "Aduenesee de sus metricas. Revise su tablero. Saber donde esta le ayuda a mejorar." },
+            { en: "Goal for today: be 1% better than yesterday. Small daily improvements build careers.", es: "Meta de hoy: sea 1% mejor que ayer. Pequenas mejoras diarias construyen carreras." },
+            { en: "Leadership is not a title. When you model safety and hustle, you are already leading.", es: "El liderazgo no es un titulo. Cuando modela seguridad y esfuerzo, ya esta liderando." },
+            { en: "If something feels unfair, escalate properly: PA then AM. We want to hear it.", es: "Si algo parece injusto, escale apropiadamente: PA luego AM. Queremos escucharlo." },
+            { en: "Remember why you are here. Keep your personal motivation front of mind today.", es: "Recuerde por que esta aqui. Mantenga su motivacion personal en mente hoy." },
+            { en: "Stay alert and be reportive. If you see it, say it. Your awareness keeps everyone safe.", es: "Mantengase alerta y reporte. Si lo ve, digalo. Su atencion mantiene a todos seguros." },
+            { en: "Your voice matters. Surveys, VOA boards, stand-ups: use them. Silence is not agreement.", es: "Su voz importa. Encuestas, tableros VOA, reuniones: uselos. El silencio no es acuerdo." }
+        ]
+    };
+var DECANT_SIT = {
+        "q-hot": [
+            { en: "HOT WEATHER: Stay hydrated. Drink water every 20-30 minutes. Electrolyte pouches are available at the hub. If you feel dizzy or nauseous, stop and go to AmCare immediately.", es: "CLIMA CALIENTE: Mantengase hidratado. Tome agua cada 20-30 minutos. Sobres de electrolitos estan disponibles en el hub. Si se siente mareado o con nauseas, pare y vaya a AmCare inmediatamente." }
+        ],
+        "q-cold": [
+            { en: "COLD WEATHER: Layer up if working near dock doors. Keep moving to maintain body heat. If you feel numbness in your fingers, take a warm-up break.", es: "CLIMA FRIO: Use capas de ropa si trabaja cerca de las puertas del muelle. Siga moviéndose para mantener el calor corporal. Si siente adormecimiento en los dedos, tome un descanso para calentarse." }
+        ],
+        "q-power": [
+            { en: "POWER ALERT: If power goes out, STAY AT YOUR STATION. Do not move. Leadership will come to you with instructions. Emergency lighting will activate. Stay calm.", es: "ALERTA DE ENERGIA: Si se va la luz, QUEDESE EN SU ESTACION. No se mueva. El liderazgo vendra a usted con instrucciones. La luz de emergencia se activara. Mantengase tranquilo." }
+        ],
+        "q-peak": [
+            { en: "PEAK DAY: Volume is high today. Pace yourself, stay hydrated, and focus on steady UPH. Do not sacrifice quality for speed. We will get through this together.", es: "DIA PICO: El volumen es alto hoy. Mida su ritmo, mantengase hidratado y enfoquese en UPH constante. No sacrifique calidad por velocidad. Saldremos de esto juntos." }
+        ],
+        "q-newhires": [
+            { en: "NEW HIRES ON FLOOR: We have new team members today. Be patient, be welcoming, and if they look lost, point them in the right direction. You represent our culture.", es: "NUEVOS EN EL PISO: Tenemos nuevos miembros del equipo hoy. Sea paciente, sea acogedor, y si parecen perdidos, orientelos. Usted representa nuestra cultura." }
+        ],
+        "q-audit": [
+            { en: "SAFETY AUDIT TODAY: Visitors or auditors may be on the floor. This is not about performing; just do what you always do. Proper PPE, clean stations, correct process.", es: "AUDITORIA DE SEGURIDAD HOY: Visitantes o auditores pueden estar en el piso. No se trata de actuar; solo haga lo que siempre hace. EPP correcto, estaciones limpias, proceso correcto." }
+        ],
+        "q-injury": [
+            { en: "SAFETY REMINDER: We had a recent injury/near-miss. Learn from it. Slow down at that step, double-check your surroundings, and never skip safety for speed.", es: "RECORDATORIO DE SEGURIDAD: Tuvimos una lesion/casi-accidente reciente. Aprenda de ello. Vaya mas lento en ese paso, revise su alrededor, y nunca omita la seguridad por velocidad." }
+        ],
+        "q-weather": [
+            { en: "SEVERE WEATHER: Storm warnings are active. If alarms sound, follow your PA to the designated shelter area immediately. Do not go outside. Stay away from dock doors.", es: "CLIMA SEVERO: Hay alertas de tormenta activas. Si suenan las alarmas, siga a su PA al area de refugio designada inmediatamente. No salga. Mantengase lejos de las puertas del muelle." }
+        ]
+    };
+
+// ===== PORTED CONTENT: STOW (verbatim from live tool) =====
+var STOW_POOLS = {
+SAFETY:[
+{en:"Always wear your PPE. Gloves and safety shoes are mandatory every second you are on the floor. No exceptions, no excuses.",es:"Siempre use su EPP. Guantes y zapatos de seguridad son obligatorios cada segundo en el piso. Sin excepciones, sin excusas."},
+{en:"Tie up your hair if it falls below your shoulders. Loose hair near conveyors and shelving is a serious entanglement risk.",es:"Recoja su cabello si cae debajo de los hombros. El cabello suelto cerca de transportadores y estantes es un riesgo serio de atrapamiento."},
+{en:"STOP at the end of every aisle before exiting with your cart. Look both ways. Collisions with pickers happen when you rush out blind.",es:"PARE al final de cada pasillo antes de salir con su carrito. Mire en ambas direcciones. Las colisiones con recolectores pasan cuando sale a ciegas."},
+{en:"Bend with your knees, not your back. Pivot your feet to turn. Never twist at the waist. One wrong twist can sideline you for weeks.",es:"Doble las rodillas, no la espalda. Gire con los pies. Nunca tuerza la cintura. Un mal giro puede sacarlo por semanas."},
+{en:"Use a ladder for ANY bin above eye level. Reaching overhead causes shoulder injuries and drops items on people below you.",es:"Use escalera para CUALQUIER contenedor por encima del nivel de los ojos. Estirarse causa lesiones de hombro y deja caer articulos sobre personas abajo."},
+{en:"Never push a cart behind or around a ladder in a tight aisle. Wait for the ladder user to finish or find another route. Patience prevents injuries.",es:"Nunca empuje un carrito detras o alrededor de una escalera en un pasillo estrecho. Espere a que termine o busque otra ruta. La paciencia previene lesiones."},
+{en:"Be aware of picker traffic at all times. You share aisles. A simple 'behind you' or 'coming through' prevents collisions.",es:"Este atento al trafico de recolectores. Comparten pasillos. Un simple 'atras de ti' o 'voy pasando' previene colisiones."},
+{en:"Keep your cart stable and balanced. Never overload one side. A tipping cart can crush toes, damage inventory, and block the aisle.",es:"Mantenga su carrito estable y balanceado. Nunca sobrecargue un lado. Un carrito volcado puede aplastar dedos, danar inventario y bloquear el pasillo."},
+{en:"Report spills, leaks, and broken items immediately. Place a cone, alert your PA. Do not walk away assuming someone else will handle it.",es:"Reporte derrames, fugas y articulos rotos inmediatamente. Ponga un cono, alerte a su PA. No se vaya asumiendo que alguien mas lo hara."},
+{en:"If you hear an alarm or smell something burning near equipment, STOP. Move away, alert others, and notify leadership immediately.",es:"Si escucha una alarma o huele algo quemandose cerca del equipo, PARE. Alejese, alerte a otros y notifique al liderazgo inmediatamente."},
+{en:"Never ride on carts or use them as scooters. Walk behind your cart with both hands on the handle at all times.",es:"Nunca se suba a los carritos ni los use como patinetas. Camine detras con ambas manos en el mango en todo momento."},
+{en:"Watch your fingers when loading bins. Pinch points exist on shelving edges. That half-second of care prevents a laceration.",es:"Cuide sus dedos al cargar contenedores. Hay puntos de pellizco en los bordes. Ese medio segundo de cuidado previene una cortada."},
+{en:"Items on the floor are trip hazards for everyone. If you see it, pick it up immediately. Place it in the nearest amnesty bin.",es:"Articulos en el piso son peligros de tropiezo para todos. Si lo ve, recojalo inmediatamente. Coloquelo en el contenedor de amnistia mas cercano."},
+{en:"Never block fire exits, extinguishers, or AED stations with carts. Know where your emergency equipment is on your floor.",es:"Nunca bloquee salidas de emergencia, extintores o estaciones AED con carritos. Sepa donde esta su equipo de emergencia en su piso."},
+{en:"If you feel any pain, report to AmCare immediately. Early reporting prevents minor strains from becoming major injuries that cost you weeks.",es:"Si siente cualquier dolor, reporte a AmCare inmediatamente. Reportar temprano previene que molestias menores se conviertan en lesiones que le cuesten semanas."}
+],
+STANDARD_WORK:[
+{en:"Check your scanner before each scan. Verify the screen shows the correct bin and ASIN. One wrong scan creates a DPMO error that downstream must fix.",es:"Revise su escaner antes de cada escaneo. Verifique que muestre el contenedor y ASIN correcto. Un escaneo incorrecto crea un error DPMO que el proceso posterior debe corregir."},
+{en:"Do NOT cherry-pick carts. Always grab from the CONE. First In, First Out. The oldest inventory needs to move first.",es:"NO escoja carritos. Siempre tome del CONO. Primero en entrar, primero en salir. El inventario mas antiguo necesita moverse primero."},
+{en:"If your scanner says overage detected, do not worry. It is a system adjustment. Stow it normally and keep moving.",es:"Si su escaner dice exceso detectado, no se preocupe. Es un ajuste del sistema. Almacenelo normalmente y siga."},
+{en:"Only drop your cart for Problem Solve. ALWAYS scan the PS drop zone barcode. An unscanned drop becomes a missing cart that wastes everyones time.",es:"Solo deje su carrito para Solucion de Problemas. SIEMPRE escanee el codigo PS. Un carrito sin escanear se convierte en un carrito perdido que desperdicia tiempo de todos."},
+{en:"Bin etiquette: fix any overhang immediately. Items must not stick out past the bin lip. Overhang causes pick errors and can fall on people.",es:"Etiqueta de contenedores: corrija cualquier sobresaliente. Los articulos no deben sobresalir del borde. Lo que sobresale causa errores y puede caer sobre personas."},
+{en:"Follow the LOOK method: Look at the bin, Observe space available, Orient the item correctly, Keep it neat. Every single stow.",es:"Siga el metodo LOOK: Mire el contenedor, Observe el espacio, Oriente el articulo correctamente, Mantengalo ordenado. Cada almacenamiento."},
+{en:"Do not stow same or similar ASINs in adjacent bins. Use a checkerboard pattern. This prevents pick errors where pickers grab from the wrong location.",es:"No almacene ASINs iguales o similares en contenedores adyacentes. Use patron de tablero de ajedrez. Esto previene errores de recoleccion."},
+{en:"Face all barcodes and labels outward. The picker downstream needs to see and scan them without pulling items out of the bin.",es:"Coloque codigos de barras y etiquetas hacia afuera. El recolector necesita verlos y escanearlos sin sacar articulos del contenedor."},
+{en:"Heavy items go on lower bins, light items up top. This is physics: a heavy item falling from eye level is an injury waiting to happen.",es:"Articulos pesados van abajo, ligeros arriba. Es fisica: un articulo pesado cayendo desde el nivel de los ojos es una lesion esperando pasar."},
+{en:"No barcode or system rejects it? Set it aside for Problem Solve. Never force-stow. Guessing creates errors that multiply downstream.",es:"Sin codigo o el sistema lo rechaza? Apartelo para Solucion de Problemas. Nunca fuerce. Adivinar crea errores que se multiplican."},
+{en:"Do NOT overstuff bins. If you have to push items aside or force something in, the bin is full. Find the next available location.",es:"NO sobrecargue contenedores. Si tiene que empujar articulos o forzar algo, esta lleno. Busque la siguiente ubicacion disponible."},
+{en:"Return your scanner AND battery at end of shift. Every single day. Missing equipment costs the site money and delays the next shift startup.",es:"Devuelva su escaner Y bateria al final del turno. Cada dia. Equipo faltante cuesta dinero al sitio y retrasa el inicio del siguiente turno."},
+{en:"Scan the bin THEN place the item. This sequence ensures the system registers the correct location before you move on.",es:"Escanee el contenedor LUEGO coloque el articulo. Esta secuencia asegura que el sistema registre la ubicacion correcta antes de avanzar."},
+{en:"If a bin is damaged or structurally compromised, do NOT stow there. Report it to your PA and move to the next bin.",es:"Si un contenedor esta danado o comprometido, NO almacene ahi. Reportelo a su PA y muevase al siguiente."},
+{en:"Any items found on the floor go in amnesty. Do not try to figure out where they belong. That is Problem Solves job, not yours.",es:"Articulos en el piso van a amnistia. No intente adivinar donde van. Ese es el trabajo de Solucion de Problemas, no el suyo."}
+],
+PRODUCTIVITY:[
+{en:"Your rate matters. Know your UPH target. If you do not know it, ask your manager RIGHT NOW. You cannot improve what you do not measure.",es:"Su ritmo importa. Conozca su meta de UPH. Si no la sabe, pregunte a su gerente AHORA. No puede mejorar lo que no mide."},
+{en:"Do NOT stow right next to another stower unless there is absolutely no other space. Two stowers in one aisle block pickers and kill both your rates.",es:"NO almacene justo al lado de otro almacenador a menos que no haya otro espacio. Dos almacenadores en un pasillo bloquean recolectores y matan el ritmo de ambos."},
+{en:"Stay productive. Stay on top of it. A steady consistent pace all shift is what separates top performers from average. Be the top performer.",es:"Mantengase productivo. Mantengase al tanto. Un ritmo constante todo el turno separa a los mejores del promedio. Sea el mejor."},
+{en:"Minimize empty walking. Plan your route before entering the aisle. Know which bins you need and hit them in sequence.",es:"Minimice caminar vacio. Planee su ruta antes de entrar. Sepa que contenedores necesita y visitelos en secuencia."},
+{en:"Keep your cart organized. Group items by aisle so you are not circling back. Organization saves steps, steps save minutes, minutes build rate.",es:"Mantenga su carrito organizado. Agrupe por pasillo para no regresar. Organizacion ahorra pasos, pasos ahorran minutos, minutos construyen ritmo."},
+{en:"When your cart is empty, go directly to the cone. Grab the next cart immediately. Transition time is dead time on your rate.",es:"Cuando su carrito este vacio, vaya directo al cono. Tome el siguiente carrito inmediatamente. Tiempo de transicion es tiempo muerto en su ritmo."},
+{en:"If your scanner is slow or glitching, swap it IMMEDIATELY. Do not waste an hour fighting a broken tool. See your PA for a replacement.",es:"Si su escaner esta lento o fallando, cambielo INMEDIATAMENTE. No desperdicie una hora con herramienta rota. Vea a su PA para reemplazo."},
+{en:"Stow with both hands working. One hand places, the other reaches for the next item. Build that muscle memory for speed and flow.",es:"Almacene con ambas manos. Una coloca, la otra busca el siguiente articulo. Construya memoria muscular para velocidad y flujo."},
+{en:"Consistency beats bursts. Sprint for 2 hours then drag for 8 and your UPH suffers. Find a pace you can sustain the entire shift.",es:"Consistencia gana a los arranques. Correr 2 horas y arrastrar 8 y su UPH sufre. Encuentre un ritmo que pueda sostener todo el turno."},
+{en:"Every minute of idle time shows up in your rate. Chatting, phone, wandering: those are units you did not stow. Own your numbers.",es:"Cada minuto de tiempo muerto aparece en su ritmo. Platicando, telefono, deambulando: son unidades que no almaceno. Aduenesee de sus numeros."},
+{en:"Top stowers pre-read their cart before starting. Look at what you have, identify which aisles to hit, and execute in the most efficient order.",es:"Los mejores almacenadores pre-leen su carrito antes de empezar. Mire lo que tiene, identifique que pasillos visitar, y ejecute en el orden mas eficiente."},
+{en:"Feel free to ask your PA or manager what your current rate is at any point during the shift. Real-time feedback helps you adjust.",es:"No dude en preguntar a su PA o gerente cual es su ritmo actual en cualquier momento del turno. Retroalimentacion en tiempo real le ayuda a ajustarse."},
+{en:"If you hit a jam, do not sit on it. Flag your PA or Problem Solver within 60 seconds. Waiting silently kills your rate and our flow.",es:"Si se atora, no se quede ahi. Alerte a su PA o Solucionador en 60 segundos. Esperar en silencio mata su ritmo y nuestro flujo."},
+{en:"Your rate is your reputation. Associates who consistently hit target get recognized, get opportunities, and get promoted. The work speaks.",es:"Su ritmo es su reputacion. Asociados que llegan a la meta consistentemente son reconocidos, obtienen oportunidades y son promovidos. El trabajo habla."},
+{en:"Do not make others carry your weight. Equal effort means equal work. Grab from the cone, stay in your zone, and perform at standard.",es:"No haga que otros carguen su peso. Esfuerzo igual es trabajo igual. Tome del cono, quedese en su zona y rinda al estandar."}
+],
+HOUSEKEEPING:[
+{en:"Keep your stow area CLEAN. See trash? Pick it up. Goal: grab at least 3 pieces of trash today. A clean floor is a safe, efficient floor.",es:"Mantenga su area LIMPIA. Ve basura? Recojala. Meta: recoja al menos 3 pedazos hoy. Un piso limpio es un piso seguro y eficiente."},
+{en:"Items on the floor are not someone elses problem. They are YOUR problem right now. Pick them up and amnesty them or alert your PA.",es:"Articulos en el piso no son problema de otro. Son SU problema ahora. Recogalos y llevelos a amnistia o alerte a su PA."},
+{en:"Leave your aisle cleaner than you found it. The next stower or picker deserves a workspace, not an obstacle course.",es:"Deje su pasillo mas limpio de como lo encontro. El siguiente almacenador o recolector merece un espacio de trabajo, no una carrera de obstaculos."},
+{en:"Empty boxes, plastic wrap, and dunnage do not belong on the floor or stuffed in bins. Break them down and dispose properly.",es:"Cajas vacias, plastico y material de empaque no van en el piso ni metidos en contenedores. Desarmelos y disponga apropiadamente."},
+{en:"Promote cleanliness among your peers. If you see someone leave trash behind, say something respectfully. We hold each other accountable.",es:"Promueva la limpieza entre companeros. Si ve a alguien dejar basura, diga algo respetuosamente. Nos hacemos responsables mutuamente."},
+{en:"A cluttered aisle slows everyone: stowers, pickers, waterspiders. Five seconds of cleanup saves minutes for the whole operation.",es:"Un pasillo desordenado hace lento a todos: almacenadores, recolectores, waterspiders. Cinco segundos de limpieza ahorran minutos para toda la operacion."},
+{en:"Check bins for spills, leaks, or sticky residue as you stow. Report contamination immediately before more inventory gets damaged.",es:"Revise contenedores por derrames, fugas o residuos mientras almacena. Reporte contaminacion inmediatamente antes de que mas inventario se dane."},
+{en:"End of shift: leave your cart clean, organized, and in proper staging. Respect the person who picks up where you left off.",es:"Fin de turno: deje su carrito limpio, organizado y en el area correcta. Respete a quien continua donde usted dejo."}
+],
+TEAMWORK:[
+{en:"Time issues (missed punch, schedule conflict)? Come see a manager PROACTIVELY. Do not make us hunt you down. That wastes everyones time.",es:"Problemas de tiempo (ponche perdido, conflicto de horario)? Venga a ver a un gerente PROACTIVAMENTE. No nos haga buscarlo. Eso desperdicia tiempo de todos."},
+{en:"Badge or PIN resets: come see a manager immediately. Do not spend half your shift locked out. We solve it in 2 minutes.",es:"Reinicio de gafete o PIN: venga a ver a un gerente inmediatamente. No pase medio turno bloqueado. Lo resolvemos en 2 minutos."},
+{en:"Always ask for help from your PA or Problem Solver when stuck. Sitting on a problem silently for 10 minutes is 10 minutes of zero production.",es:"Siempre pida ayuda a su PA o Solucionador cuando este atorado. Quedarse callado 10 minutos son 10 minutos de cero produccion."},
+{en:"Do not block aisles for pickers. If a picker needs through, yield. Their takt time is tight and your cooperation keeps the building flowing.",es:"No bloquee pasillos para recolectores. Si necesitan pasar, ceda. Su tiempo de ciclo es ajustado y su cooperacion mantiene el flujo del edificio."},
+{en:"Share the workload fairly. Do not dump hard carts on others. You got a tough one? Stow it. The next might be easier.",es:"Comparta la carga justamente. No tire carritos dificiles a otros. Le toco uno dificil? Almacenelo. El siguiente podria ser mas facil."},
+{en:"See a new hire struggling? Take 30 seconds to help or point them to their PA. You were new once. That moment of guidance matters.",es:"Ve a un nuevo luchando? Tome 30 segundos para ayudar o dirigirlo a su PA. Usted fue nuevo alguna vez. Ese momento de guia importa."},
+{en:"Communicate when leaving the floor. Your PA needs to know for coverage and labor tracking. A quick heads-up is all it takes.",es:"Comunique cuando deje el piso. Su PA necesita saber para cobertura y rastreo. Un aviso rapido es todo lo que se necesita."},
+{en:"Celebrate team wins. If we hit our stow target, that is everyones effort. Acknowledge the hustle of the people around you.",es:"Celebre logros del equipo. Si llegamos a la meta, es esfuerzo de todos. Reconozca el trabajo de las personas a su alrededor."},
+{en:"Your manager is here to SUPPORT you, not police you. Bring problems early and we solve them together. That is how trust is built.",es:"Su gerente esta aqui para APOYARLO, no vigilarlo. Traiga problemas temprano y los resolvemos juntos. Asi se construye la confianza."},
+{en:"Cross-training is available. Want to learn Problem Solve, waterspider, or indirect roles? Tell your PA. Growth is earned by asking for it.",es:"Capacitacion cruzada disponible. Quiere aprender Solucion de Problemas, waterspider o roles indirectos? Diga a su PA. El crecimiento se gana pidiendolo."}
+],
+ENGAGEMENT:[
+{en:"The start-of-shift questionnaire exists for YOUR voice. Answer honestly. Do not hit rather not answer. Your feedback drives real changes in this building.",es:"El cuestionario de inicio de turno existe para SU voz. Conteste honestamente. No presione prefiero no contestar. Su retroalimentacion genera cambios reales."},
+{en:"Your rate is your career path. Associates who consistently perform, show initiative, and engage are the ones who get tapped for leadership.",es:"Su ritmo es su camino profesional. Asociados que rinden, muestran iniciativa y se comprometen son elegidos para liderazgo."},
+{en:"Own your performance. Ask your PA what your UPH is mid-shift. Knowing where you stand gives you the power to improve intentionally.",es:"Aduenesee de su rendimiento. Pregunte a su PA su UPH a mitad de turno. Saber donde esta le da poder de mejorar intencionalmente."},
+{en:"Leadership is earned through action, not title. When you model safety, cleanliness, and rate, you ARE leading even without the vest.",es:"El liderazgo se gana con acciones, no con titulo. Cuando modela seguridad, limpieza y ritmo, YA esta liderando incluso sin el chaleco."},
+{en:"See something that could be improved? Speak up. Use the VOA board, tell your PA, bring it to standup. Good ideas get implemented here.",es:"Ve algo que podria mejorarse? Hable. Use el tablero VOA, diga a su PA, traigalo al standup. Las buenas ideas se implementan aqui."},
+{en:"Goal for today: be 1% better than yesterday. One fewer error, one more unit per hour, one more piece of trash picked up. Compound it.",es:"Meta de hoy: sea 1% mejor que ayer. Un error menos, una unidad mas por hora, un pedazo mas de basura recogido. Acumulelo."},
+{en:"Remember why you are here. Family, goals, career, independence. Whatever drives you, let it fuel your effort on this shift.",es:"Recuerde por que esta aqui. Familia, metas, carrera, independencia. Lo que lo impulse, deje que alimente su esfuerzo en este turno."},
+{en:"If something feels unfair, escalate properly: PA first, then AM. We genuinely want to fix issues but need you to bring them to us.",es:"Si algo parece injusto, escale: PA primero, luego AM. Genuinamente queremos arreglar problemas pero necesitamos que los traiga."},
+{en:"Attendance and reliability build trust. Show up consistently, on time, and you become the person leadership relies on for opportunities.",es:"Asistencia y confiabilidad construyen confianza. Presentese consistentemente, a tiempo, y se convierte en la persona de confianza para oportunidades."},
+{en:"We track DPMO: defects per million opportunities. Every quality stow protects the team scorecard. Your precision directly impacts our numbers.",es:"Rastreamos DPMO: defectos por millon de oportunidades. Cada almacenamiento de calidad protege el marcador del equipo. Su precision impacta nuestros numeros directamente."}
+]
+};
+var STOW_SIT = {
+"q-hot":[{en:"HOT WEATHER: Drink water every 20-30 minutes. Do NOT wait until thirsty. Electrolyte pouches available at the hub. Dizzy, nauseous, or headache? STOP immediately and go to AmCare. Your health is worth more than any rate.",es:"CLIMA CALIENTE: Tome agua cada 20-30 min. NO espere a tener sed. Electrolitos en el hub. Mareado, nauseas o dolor de cabeza? PARE inmediatamente y vaya a AmCare. Su salud vale mas que cualquier ritmo."}],
+"q-cold":[{en:"COLD WEATHER: Layer up near dock doors. Cold muscles are tight muscles; stretch thoroughly. Numbness in fingers or toes means take a warm-up break immediately.",es:"CLIMA FRIO: Use capas cerca de puertas del muelle. Musculos frios son musculos tensos; estire bien. Adormecimiento en dedos significa tomar descanso para calentarse inmediatamente."}],
+"q-peak":[{en:"PEAK VOLUME: Cones will be full, carts keep coming. Pace yourself: steady UPH all shift beats burning out in 3 hours. Take breaks. Stay hydrated. Quality still matters; fast and wrong is just wrong.",es:"VOLUMEN PICO: Los conos estaran llenos, los carritos seguiran. Mida su ritmo: UPH constante es mejor que quemarse en 3 horas. Tome descansos. Hidratese. La calidad sigue importando; rapido y mal es solo mal."}],
+"q-newhires":[{en:"NEW HIRES ON FLOOR: Be patient, be approachable, model correct behavior. If they look lost, point them to their learning ambassador or PA. You represent what excellence looks like here.",es:"NUEVOS EN EL PISO: Sea paciente, accesible, modele comportamiento correcto. Si se ven perdidos, dirigalos a su embajador o PA. Usted representa como se ve la excelencia aqui."}],
+"q-dropzone":[{en:"DROP ZONE RULES: Empty carts go to REGULAR drop zone. Problem Solve carts go to PS area ONLY. Scan the correct DZ barcode EVERY time. Mixing zones creates lost carts and disrupts workflow for hours.",es:"REGLAS DE ZONA: Carritos vacios van a zona REGULAR. Carritos PS van al area PS SOLAMENTE. Escanee el codigo DZ correcto CADA vez. Mezclar zonas crea carritos perdidos y afecta el flujo por horas."}],
+"q-injury":[{en:"SAFETY INCIDENT: We had a recent injury or near-miss. Safety is NOT optional. Slow down at high-risk moments, check surroundings, NEVER skip safety for speed. Learn from it so it does not happen again.",es:"INCIDENTE DE SEGURIDAD: Tuvimos una lesion o casi-accidente. La seguridad NO es opcional. Vaya lento en momentos de riesgo, revise su alrededor, NUNCA omita seguridad por velocidad. Aprendan para que no vuelva a pasar."}],
+"q-audit":[{en:"LEADERSHIP VISIT: Visitors or auditors may be on floor. Do NOT change anything; do what you always should. Proper PPE, correct process, clean aisles. If you have been doing it right, you have nothing to worry about.",es:"VISITA DE LIDERAZGO: Visitantes o auditores pueden estar en el piso. NO cambie nada; haga lo que siempre deberia. EPP correcto, proceso correcto, pasillos limpios. Si lo ha hecho bien, no tiene de que preocuparse."}],
+"q-power":[{en:"SYSTEM/POWER RISK: If systems go down or power cuts, STAY AT YOUR STATION. Do not wander. Leadership will come to you with instructions. Emergency lighting activates. Stay calm, stay put.",es:"RIESGO SISTEMA/ENERGIA: Si sistemas caen o se corta energia, QUEDESE EN SU ESTACION. No deambule. Liderazgo vendra con instrucciones. Luz de emergencia se activa. Mantengase tranquilo, quedese."}],
+"q-rate":[{en:"RATE FOCUS TODAY: We are emphasizing stow rate. Know your UPH target. Minimize idle time, plan routes, keep transitions under 90 seconds, stay in zone. Rate is tracked hourly. Own your numbers and be proud of them.",es:"ENFOQUE EN RITMO HOY: Estamos enfatizando ritmo de almacenamiento. Conozca su meta UPH. Minimice tiempo muerto, planee rutas, transiciones bajo 90 segundos, quedese en zona. Se rastrea por hora. Aduenesee de sus numeros."}],
+"q-quality":[{en:"QUALITY FOCUS: DPMO is being watched closely today. Double-check every scan. Verify bin numbers before placing. Do not overstuff. Use checkerboard for same ASINs. One careless stow hurts the entire team scorecard.",es:"ENFOQUE CALIDAD: DPMO se vigila de cerca hoy. Revise cada escaneo dos veces. Verifique contenedores antes de colocar. No sobrecargue. Use tablero de ajedrez para mismos ASINs. Un almacenamiento descuidado dana el marcador de todo el equipo."}]
+};
+</script>
+
+<script>
+// ===== SHARED CONTENT: applies to every department =====
+var COMMON = {
+  SAFETY: [
+    { en: "Report all injuries immediately, no matter how small. AmCare is here for you.", es: "Reporte todas las lesiones inmediatamente, sin importar que tan pequenas sean. AmCare esta aqui para usted." },
+    { en: "Know your nearest emergency exit and muster point before you start working.", es: "Conozca su salida de emergencia mas cercana y su punto de reunion antes de empezar a trabajar." },
+    { en: "Make eye contact with PIT drivers before crossing any PIT lane. Never assume they see you.", es: "Haga contacto visual con los conductores de PIT antes de cruzar cualquier carril. Nunca asuma que lo ven." },
+    { en: "Keep walkways clear. A blocked aisle is a trip hazard and slows emergency response.", es: "Mantenga los pasillos despejados. Un pasillo bloqueado es un peligro de tropiezo y retrasa la respuesta de emergencia." },
+    { en: "Use proper lifting: bend your knees, keep the load close, and ask for team lift over 50 lbs.", es: "Levante correctamente: doble las rodillas, mantenga la carga cerca, y pida ayuda para mas de 50 libras." },
+    { en: "If you see something unsafe, say something. Use ANDON or tell your PA or AM right away.", es: "Si ve algo inseguro, digalo. Use ANDON o avise a su PA o AM de inmediato." },
+    { en: "No phones while walking on the floor. Heads up, eyes forward.", es: "No use el telefono mientras camina por el piso. Cabeza arriba, ojos al frente." },
+    { en: "Report spills immediately and guard them until they are cleaned. Even water can cause a fall.", es: "Reporte los derrames de inmediato y vigilelos hasta que se limpien. Hasta el agua puede causar una caida." }
+  ],
+  TEAMWORK: [
+    { en: "Help a teammate who is falling behind. We win as one team, not as individuals.", es: "Ayude a un companero que se este quedando atras. Ganamos como un equipo, no como individuos." },
+    { en: "New faces on the line today? Introduce yourself and show them one thing that makes the job easier.", es: "Hay caras nuevas hoy? Presentese y ensene una cosa que haga el trabajo mas facil." },
+    { en: "Treat every associate with respect. Different shifts, same team, same customer.", es: "Trate a cada asociado con respeto. Diferentes turnos, mismo equipo, mismo cliente." },
+    { en: "Communicate at shift handover. What you leave behind is what the next shift inherits.", es: "Comunique en el cambio de turno. Lo que usted deja es lo que hereda el siguiente turno." },
+    { en: "Recognize good work out loud. A simple 'nice job' changes someone's whole day.", es: "Reconozca el buen trabajo en voz alta. Un simple 'buen trabajo' cambia el dia de alguien." },
+    { en: "If you finish your area, ask where the team needs you next. Flexibility keeps the building flowing.", es: "Si termina su area, pregunte donde lo necesita el equipo. La flexibilidad mantiene el edificio fluyendo." }
+  ],
+  WELLNESS: [
+    { en: "Hydrate before you feel thirsty. Water stations are always available - use them.", es: "Hidratese antes de sentir sed. Las estaciones de agua siempre estan disponibles - uselas." },
+    { en: "Stretch during your breaks. Ten seconds of stretching prevents hours of soreness.", es: "Estirese durante sus descansos. Diez segundos de estiramiento previenen horas de dolor." },
+    { en: "Rotate your tasks when possible to avoid repetitive strain on the same muscles.", es: "Rote sus tareas cuando sea posible para evitar el desgaste repetitivo de los mismos musculos." },
+    { en: "Mental health matters. If you are struggling, talk to your manager or use the EAP resources - free and confidential.", es: "La salud mental importa. Si esta pasando por algo dificil, hable con su gerente o use los recursos de EAP - gratis y confidencial." },
+    { en: "Good sleep is a safety tool. Fatigue slows your reaction time as much as alcohol does.", es: "Dormir bien es una herramienta de seguridad. La fatiga reduce su tiempo de reaccion tanto como el alcohol." },
+    { en: "Take your full breaks. You earn them, you need them, and the work will still be here.", es: "Tome sus descansos completos. Se los gano, los necesita, y el trabajo seguira aqui." }
+  ]
+};
+
+// shared situational toggles (all departments)
+var COMMON_SIT = {
+  "q-hot":  { label:"Hot Weather", em:"&#127774;", pts:[{ en:"HOT WEATHER: Stay hydrated. Drink water every 20-30 minutes. Electrolyte pouches are available. If you feel dizzy or nauseous, stop and go to AmCare immediately.", es:"CLIMA CALIENTE: Mantengase hidratado. Tome agua cada 20-30 minutos. Hay sobres de electrolitos disponibles. Si se siente mareado o con nauseas, pare y vaya a AmCare inmediatamente." }] },
+  "q-cold": { label:"Cold Weather", em:"&#10052;&#65039;", pts:[{ en:"COLD WEATHER: Layer up if working near dock doors. Keep moving to maintain body heat. If you feel numbness in your fingers, take a warm-up break.", es:"CLIMA FRIO: Use capas de ropa si trabaja cerca de las puertas del muelle. Siga moviendose para mantener el calor. Si siente adormecimiento en los dedos, tome un descanso para calentarse." }] },
+  "q-power":{ label:"Power Outage Risk", em:"&#9889;", pts:[{ en:"POWER ALERT: If power goes out, STAY AT YOUR STATION. Do not move. Leadership will come to you with instructions. Emergency lighting will activate. Stay calm.", es:"ALERTA DE ENERGIA: Si se va la luz, QUEDESE EN SU ESTACION. No se mueva. El liderazgo vendra con instrucciones. La luz de emergencia se activara. Mantengase tranquilo." }] },
+  "q-peak": { label:"Peak / High Volume", em:"&#128200;", pts:[{ en:"PEAK DAY: Volume is high today. Pace yourself, stay hydrated, and focus on steady rate. Do not sacrifice quality for speed. We will get through this together.", es:"DIA PICO: El volumen es alto hoy. Mida su ritmo, mantengase hidratado y enfoquese en un ritmo constante. No sacrifique calidad por velocidad. Saldremos adelante juntos." }] },
+  "q-newhires":{ label:"New Hires Today", em:"&#127891;", pts:[{ en:"NEW HIRES: We have new associates on the floor today. Be patient, answer questions, and lead by example. Everyone here was new once.", es:"NUEVOS ASOCIADOS: Tenemos asociados nuevos en el piso hoy. Sea paciente, responda preguntas y de el ejemplo. Todos aqui fuimos nuevos alguna vez." }] },
+  "q-audit":{ label:"Audit / Visit Day", em:"&#128203;", pts:[{ en:"AUDIT DAY: We have visitors/auditors in the building. Follow standard work exactly, keep your area clean, and be proud to show how we operate.", es:"DIA DE AUDITORIA: Tenemos visitantes/auditores en el edificio. Siga el trabajo estandar exactamente, mantenga su area limpia y muestre con orgullo como operamos." }] },
+  "q-injury":{ label:"Recent Injury / Near Miss", em:"&#9888;&#65039;", pts:[{ en:"SAFETY FOCUS: We had a recent injury/near miss in the network. Slow down, follow standard work, and look out for each other today. Nothing we ship is worth getting hurt for.", es:"ENFOQUE DE SEGURIDAD: Tuvimos una lesion/casi accidente reciente en la red. Baje el ritmo, siga el trabajo estandar y cuidense entre todos hoy. Nada de lo que enviamos vale una lesion." }] },
+  "q-rate": { label:"Behind on Rate", em:"&#9201;&#65039;", pts:[{ en:"RATE FOCUS: We are behind plan. Small things add up: minimize walking, keep your station stocked, stay in process. Steady beats fast.", es:"ENFOQUE DE RITMO: Estamos detras del plan. Las cosas pequenas suman: camine menos, mantenga su estacion surtida, siga el proceso. Constante gana a rapido." }] },
+  "q-quality":{ label:"Quality Focus", em:"&#127919;", pts:[{ en:"QUALITY FOCUS: Defects are trending up. Slow down 5 percent, scan deliberately, and verify before you confirm. One defect reaches one real customer.", es:"ENFOQUE DE CALIDAD: Los defectos estan subiendo. Baje la velocidad 5 por ciento, escanee con cuidado y verifique antes de confirmar. Un defecto llega a un cliente real." }] }
+};
+</script>
+
+<script>
+// ===== DEPARTMENT CONTENT PACKS: INBOUND =====
+var PACKS = {};
+
+PACKS["inbound-dock"] = { SAFETY:[
+  { en:"Never enter a trailer until it is chocked, dock-locked, and the light is GREEN. Check every time.", es:"Nunca entre a un trailer hasta que este bloqueado, asegurado al muelle y la luz este VERDE. Verifique cada vez." },
+  { en:"Watch for unstable freight walls when opening trailer doors. Stand to the side as you open.", es:"Cuidado con paredes de carga inestables al abrir las puertas del trailer. Parese a un lado al abrir." },
+  { en:"Keep dock plates clear and report any damaged plate immediately. Do not walk on a bad plate.", es:"Mantenga las placas del muelle despejadas y reporte cualquier placa danada de inmediato. No camine sobre una placa mala." }],
+STANDARD_WORK:[
+  { en:"Scan every pallet as it comes off the trailer. Unscanned freight is invisible freight.", es:"Escanee cada tarima al bajarla del trailer. Carga sin escanear es carga invisible." },
+  { en:"Stage pallets in the marked lanes only. Correct staging keeps PIT flow safe and fast.", es:"Coloque las tarimas solo en los carriles marcados. El almacenaje correcto mantiene el flujo de PIT seguro y rapido." },
+  { en:"Damaged freight goes to the damage lane with a problem-solve ticket - never into the flow.", es:"La carga danada va al carril de danos con un ticket de problem solve - nunca al flujo." }],
+PRODUCTIVITY:[
+  { en:"Unload in sequence, floor to ceiling, back to front. A system beats speed every time.", es:"Descargue en secuencia, de piso a techo, de atras hacia adelante. Un sistema le gana a la velocidad siempre." },
+  { en:"Keep the door turning: when a trailer is empty, close it out in the system right away so the yard can move.", es:"Mantenga la puerta girando: cuando un trailer este vacio, cierrelo en el sistema de inmediato para que el patio se mueva." },
+  { en:"Communicate blockers early. If a trailer is problem freight, flag it - do not fight it alone.", es:"Comunique los bloqueos temprano. Si un trailer tiene carga con problemas, avise - no luche solo." }]};
+
+PACKS["pallet-receive"] = { SAFETY:[
+  { en:"Check pallet integrity before moving it. Broken boards and leaning stacks cause tip-overs.", es:"Revise la integridad de la tarima antes de moverla. Tablas rotas y pilas inclinadas causan volcaduras." },
+  { en:"Never walk under raised forks or stand behind a reversing PIT. Stay in walkways.", es:"Nunca camine bajo horquillas elevadas ni se pare detras de un PIT en reversa. Use los pasillos peatonales." },
+  { en:"Cut bands and shrink wrap away from your body with a safety cutter only.", es:"Corte flejes y plastico lejos de su cuerpo y solo con un cortador de seguridad." }],
+STANDARD_WORK:[
+  { en:"Verify PO and quantity match before receiving. A wrong receive poisons inventory downstream.", es:"Verifique que el PO y la cantidad coincidan antes de recibir. Un recibo erroneo dana el inventario." },
+  { en:"One pallet, one license plate. Never mix POs on a single LPN.", es:"Una tarima, una placa. Nunca mezcle POs en un solo LPN." },
+  { en:"Overages, shortages, damage: PS lane with proper documentation, every time.", es:"Sobrantes, faltantes, danos: al carril de PS con documentacion correcta, cada vez." }],
+PRODUCTIVITY:[
+  { en:"Keep your receive station stocked with labels and supplies before the rush, not during it.", es:"Surta su estacion con etiquetas y materiales antes de la hora pico, no durante." },
+  { en:"Batch similar freight when possible - same vendor, same flow, less rescanning.", es:"Agrupe carga similar cuando pueda - mismo proveedor, mismo flujo, menos escaneo repetido." },
+  { en:"Clear received pallets promptly so inbound lanes never back up into the dock.", es:"Retire las tarimas recibidas pronto para que los carriles de entrada nunca se congestionen hacia el muelle." }]};
+
+PACKS["each-receive"] = { SAFETY:[
+  { en:"Look before you reach into any case. Sharp items and broken glass hide under packing paper.", es:"Mire antes de meter la mano en cualquier caja. Objetos filosos y vidrio roto se esconden bajo el papel." },
+  { en:"Keep box cutters retracted the moment you finish a cut. No exceptions.", es:"Retraiga el cortador en el momento que termine el corte. Sin excepciones." },
+  { en:"Adjust your station to your height. Working at the wrong level causes shoulder and back strain.", es:"Ajuste su estacion a su altura. Trabajar al nivel incorrecto causa lesiones de hombro y espalda." }],
+STANDARD_WORK:[
+  { en:"Scan the item, not the case. Each unit must be individually verified into the tote.", es:"Escanee el articulo, no la caja. Cada unidad debe verificarse individualmente en el tote." },
+  { en:"Check expiration dates on consumables. Expired product never enters inventory.", es:"Revise fechas de vencimiento en consumibles. Producto vencido nunca entra al inventario." },
+  { en:"Wrong item in the case? Do not force it through - problem solve exists for exactly this.", es:"Articulo equivocado en la caja? No lo fuerce - problem solve existe exactamente para esto." }],
+PRODUCTIVITY:[
+  { en:"Full totes move faster: fill to the line, not over it, and keep totes flowing to the take-away.", es:"Los totes llenos se mueven mas rapido: llene hasta la linea, no mas, y mantenga los totes fluyendo." },
+  { en:"Keep both hands working: one stages the next item while the other scans.", es:"Mantenga ambas manos trabajando: una prepara el siguiente articulo mientras la otra escanea." },
+  { en:"Report slow or empty lines to your waterspider early - starving stations kill rate.", es:"Reporte lineas lentas o vacias a su waterspider temprano - estaciones sin material matan el ritmo." }]};
+
+PACKS["prep"] = { SAFETY:[
+  { en:"Heat guns and shrink tunnels stay hot long after use. Treat every surface as hot.", es:"Las pistolas de calor y tuneles permanecen calientes despues de usarse. Trate toda superficie como caliente." },
+  { en:"Keep bagging machines clear of loose sleeves, lanyards and long hair.", es:"Mantenga las maquinas de bolsas libres de mangas sueltas, cordones y cabello largo." },
+  { en:"Repetitive taping and bagging strains wrists - rotate tasks and stretch at breaks.", es:"Encintar y embolsar repetitivamente desgasta las munecas - rote tareas y estirese en descansos." }],
+STANDARD_WORK:[
+  { en:"Match the prep type to the ASIN requirement exactly: polybag, bubble, suffocation label - the system tells you, follow it.", es:"Aplique el tipo de prep exacto que requiere el ASIN: bolsa, burbuja, etiqueta de asfixia - el sistema le dice, sigalo." },
+  { en:"Suffocation warning labels on every polybag over 5 inches. This is a legal requirement, not a preference.", es:"Etiqueta de advertencia de asfixia en cada bolsa de mas de 5 pulgadas. Es un requisito legal, no una preferencia." },
+  { en:"Prep so the barcode stays scannable. A perfect bag over the barcode is a defect.", es:"Prepare de modo que el codigo de barras siga escaneable. Una bolsa perfecta sobre el codigo es un defecto." }],
+PRODUCTIVITY:[
+  { en:"Pre-cut and pre-stage materials for your most common prep types before the wave hits.", es:"Corte y prepare materiales para sus tipos de prep mas comunes antes de que llegue la ola." },
+  { en:"Batch identical ASINs - set up once, prep many.", es:"Agrupe ASINs identicos - configure una vez, prepare muchos." },
+  { en:"Keep your consumables topped up: running out of bags mid-batch doubles your time.", es:"Mantenga sus consumibles llenos: quedarse sin bolsas a media tanda duplica su tiempo." }]};
+
+PACKS["ib-ps"] = { SAFETY:[
+  { en:"Problem freight is unpredictable freight: leaking, crushed, or unknown contents. Gloves on, always.", es:"La carga con problemas es impredecible: derrames, aplastada o contenido desconocido. Guantes puestos, siempre." },
+  { en:"Never stack problem pallets above shoulder height - unstable loads live in this lane.", es:"Nunca apile tarimas con problemas arriba del hombro - las cargas inestables viven en este carril." },
+  { en:"Chemical smell or leaking liquid? Do not investigate alone. Call your AM and follow hazmat process.", es:"Olor quimico o liquido derramandose? No investigue solo. Llame a su AM y siga el proceso hazmat." }],
+STANDARD_WORK:[
+  { en:"Research before you resolve: check the PO, the manifest, and the ASIN before deciding an action.", es:"Investigue antes de resolver: revise el PO, el manifiesto y el ASIN antes de decidir una accion." },
+  { en:"Every andon you close teaches the floor. Document root cause, not just the fix.", es:"Cada andon que cierra ensena al piso. Documente la causa raiz, no solo la solucion." },
+  { en:"Aging problems get worse: work oldest first unless leadership sets a different priority.", es:"Los problemas viejos empeoran: trabaje lo mas antiguo primero salvo que el liderazgo indique otra prioridad." }],
+PRODUCTIVITY:[
+  { en:"Track your repeat offenders. Three of the same defect from one vendor is a trend - escalate it.", es:"Rastree los reincidentes. Tres del mismo defecto del mismo proveedor es una tendencia - escalela." },
+  { en:"Clear the PS lane hourly. A full lane hides new problems and blocks the flow.", es:"Despeje el carril de PS cada hora. Un carril lleno esconde problemas nuevos y bloquea el flujo." },
+  { en:"Teach the fix back to the line: five minutes of coaching prevents fifty tickets.", es:"Ensene la solucion a la linea: cinco minutos de coaching previenen cincuenta tickets." }]};
+
+PACKS["iss"] = { SAFETY:[
+  { en:"Clerical does not mean risk-free: watch PIT lanes on your way to the dock office, every trip.", es:"Trabajo de oficina no significa sin riesgo: cuidado con los carriles de PIT camino a la oficina del muelle, cada vez." },
+  { en:"Keep cords, printers and paper stock tidy - trip hazards happen in offices too.", es:"Mantenga cables, impresoras y papel en orden - los tropiezos tambien ocurren en oficinas." },
+  { en:"If a driver becomes confrontational, step back and call your manager. Never handle it alone.", es:"Si un conductor se pone agresivo, retroceda y llame a su gerente. Nunca lo maneje solo." }],
+STANDARD_WORK:[
+  { en:"Accurate appointment data keeps the whole dock honest: verify trailer numbers, seals, and paperwork every time.", es:"Datos de citas precisos mantienen honesto todo el muelle: verifique numeros de trailer, sellos y papeles cada vez." },
+  { en:"A broken seal or mismatched seal number is a security event. Report it before unloading starts.", es:"Un sello roto o con numero equivocado es un evento de seguridad. Reportelo antes de que empiece la descarga." },
+  { en:"Close out trailers in the system the moment they are done - yard accuracy starts at your desk.", es:"Cierre los trailers en el sistema en cuanto terminen - la precision del patio empieza en su escritorio." }],
+PRODUCTIVITY:[
+  { en:"Work ahead on scheduled appointments: pre-built paperwork keeps doors turning at shift change.", es:"Adelante el trabajo de citas programadas: papeles pre-hechos mantienen las puertas girando en el cambio de turno." },
+  { en:"Flag no-show and late carriers early so dock labor can be re-planned, not wasted.", es:"Avise temprano de transportistas tarde o ausentes para replanear la labor del muelle, no desperdiciarla." },
+  { en:"Keep the dock board current - the floor plans labor off what your screen says.", es:"Mantenga el tablero del muelle actualizado - el piso planea la labor segun lo que dice su pantalla." }]};
+</script>
+
+<script>
+// ===== DEPARTMENT CONTENT PACKS: OUTBOUND =====
+PACKS["pick"] = { SAFETY:[
+  { en:"Use the ladder for anything above shoulder height. Climbing shelves is an instant safety violation.", es:"Use la escalera para todo lo que este arriba del hombro. Subirse a los estantes es una violacion inmediata de seguridad." },
+  { en:"Watch your step in narrow aisles - totes and cart wheels are trip hazards at floor level.", es:"Cuide sus pasos en pasillos angostos - los totes y las ruedas de carritos son peligros de tropiezo." },
+  { en:"Push carts, do not pull them. Pulling strains your back and you cannot see where you are going.", es:"Empuje los carritos, no los jale. Jalar lastima la espalda y no puede ver hacia donde va." }],
+STANDARD_WORK:[
+  { en:"Pick the exact item the screen shows: check title, size, and color before you scan. Similar is not same.", es:"Tome exactamente el articulo que muestra la pantalla: revise titulo, tamano y color antes de escanear. Parecido no es igual." },
+  { en:"If the bin count is off, flag it - do not just take what you need and move on. ICQA depends on your flags.", es:"Si el conteo del bin esta mal, marquelo - no tome lo que necesita y siga. ICQA depende de sus reportes." },
+  { en:"Damaged item in the bin? It goes to amnesty/damage - never into a customer tote.", es:"Articulo danado en el bin? Va a amnesty/danos - nunca al tote de un cliente." }],
+PRODUCTIVITY:[
+  { en:"Trust your pick path. The system routes you the shortest way - skipping around adds walking, not speed.", es:"Confie en su ruta de pick. El sistema lo dirige por el camino mas corto - saltarse pasos agrega caminata, no velocidad." },
+  { en:"Keep totes at the line, not overflowing. Overfilled totes jam conveyors and stop everyone.", es:"Llene los totes hasta la linea, no de mas. Totes sobrellenados atascan las bandas y detienen a todos." },
+  { en:"Scan rhythm beats sprint rhythm: smooth, continuous picking wins the shift.", es:"El ritmo constante le gana al sprint: picking suave y continuo gana el turno." }]};
+
+PACKS["induct"] = { SAFETY:[
+  { en:"Keep hands clear of the conveyor transfer points. Jams get cleared with the line stopped, never live.", es:"Mantenga las manos lejos de los puntos de transferencia de la banda. Los atascos se despejan con la linea detenida, nunca en movimiento." },
+  { en:"Lift totes with your legs and keep them close - hundreds of totes a shift adds up on your back.", es:"Levante los totes con las piernas y mantengalos cerca - cientos de totes por turno se acumulan en su espalda." },
+  { en:"Report any exposed rollers, missing guards, or frayed belts immediately.", es:"Reporte rodillos expuestos, guardas faltantes o bandas desgastadas de inmediato." }],
+STANDARD_WORK:[
+  { en:"One tote, one scan, one induct. Never stack totes through the scanner.", es:"Un tote, un escaneo, un inducto. Nunca pase totes apilados por el escaner." },
+  { en:"Face labels up and readable. A bad scan at induct becomes a jackpot problem downstream.", es:"Coloque las etiquetas hacia arriba y legibles. Un mal escaneo en inducto se vuelve un problema de jackpot mas adelante." },
+  { en:"Damaged totes get swapped now, not inducted - a cracked tote jams the sorter.", es:"Los totes danados se cambian ahora, no se inductan - un tote roto atasca el clasificador." }],
+PRODUCTIVITY:[
+  { en:"Keep the belt fed but never forced: consistent spacing beats bursts.", es:"Mantenga la banda alimentada pero nunca forzada: el espaciado consistente gana a las rafagas." },
+  { en:"Stage your next totes while the current one rides the belt - no dead hands.", es:"Prepare sus siguientes totes mientras el actual va en la banda - manos siempre activas." },
+  { en:"Call for waterspider support before your line runs dry, not after.", es:"Pida apoyo del waterspider antes de que su linea se quede vacia, no despues." }]};
+
+PACKS["rebin"] = { SAFETY:[
+  { en:"Rebin walls have pinch points - place items with fingers clear of the slot edges.", es:"Las paredes de rebin tienen puntos de pellizco - coloque articulos con los dedos lejos de los bordes." },
+  { en:"Do not overreach across the wall. Move your feet, not just your arm.", es:"No se estire por encima de la pared. Mueva los pies, no solo el brazo." },
+  { en:"Keep the floor around your station clear of dropped items - one loose item is a fall waiting.", es:"Mantenga el piso alrededor de su estacion libre de articulos caidos - un articulo suelto es una caida esperando." }],
+STANDARD_WORK:[
+  { en:"Follow the light, confirm the slot. A one-slot miss splits a customer order into two shipments.", es:"Siga la luz, confirme el espacio. Un error de un espacio divide la orden de un cliente en dos envios." },
+  { en:"Scan every item individually - never assume two identical items go to the same order.", es:"Escanee cada articulo individualmente - nunca asuma que dos articulos identicos van a la misma orden." },
+  { en:"Wrong item in your tote? Send it to problem solve - do not guess a slot for it.", es:"Articulo equivocado en su tote? Enviolo a problem solve - no le adivine un espacio." }],
+PRODUCTIVITY:[
+  { en:"Two-hand rhythm: scan with one hand while the other moves to the lit slot.", es:"Ritmo a dos manos: escanee con una mano mientras la otra va al espacio iluminado." },
+  { en:"Keep pack side clear - a full chute stalls your whole wall.", es:"Mantenga el lado de pack despejado - un chute lleno detiene toda su pared." },
+  { en:"Empty totes off the line fast so pick totes keep flowing to you.", es:"Retire los totes vacios rapido para que los totes de pick sigan llegando." }]};
+
+PACKS["pack-singles"] = { SAFETY:[
+  { en:"Keep the tape gun pointed away from you and store it in the holster, never on the box pile.", es:"Apunte la pistola de cinta lejos de usted y guardela en su funda, nunca sobre las cajas." },
+  { en:"Set your station height right: pack surface at elbow level saves your shoulders all shift.", es:"Ajuste la altura de su estacion: la superficie al nivel del codo salva sus hombros todo el turno." },
+  { en:"Clear box dust and paper scraps regularly - slippery floors start at pack stations.", es:"Limpie el polvo de cajas y recortes de papel regularmente - los pisos resbalosos empiezan en pack." }],
+STANDARD_WORK:[
+  { en:"Right box, right dunnage: follow the recommended box size. Oversize boxes cost money and get crushed.", es:"Caja correcta, relleno correcto: siga el tamano de caja recomendado. Cajas grandes cuestan dinero y se aplastan." },
+  { en:"Scan the item into the box - never pre-scan a stack of shipments. One mismatch is a wrong-item defect.", es:"Escanee el articulo dentro de la caja - nunca pre-escanee una pila de envios. Un error es un defecto de articulo equivocado." },
+  { en:"Fragile items get full protection every time - the box gets thrown more times than you think.", es:"Los articulos fragiles llevan proteccion completa cada vez - la caja se avienta mas veces de las que cree." }],
+PRODUCTIVITY:[
+  { en:"Keep your top three box sizes stocked within arm's reach - restock at the start of every hour.", es:"Mantenga sus tres tamanos de caja principales al alcance - resurta al inicio de cada hora." },
+  { en:"Fold-scan-seal in one flow. Wasted motions cost seconds; seconds cost hundreds of units a shift.", es:"Doble-escanee-selle en un solo flujo. Movimientos extra cuestan segundos; los segundos cuestan cientos de unidades por turno." },
+  { en:"SIOC items (ships in own container) skip the box - know your SIOC list.", es:"Articulos SIOC (se envian en su propio empaque) no llevan caja - conozca su lista SIOC." }]};
+
+PACKS["pack-multis"] = { SAFETY:[
+  { en:"Chutes back up fast - never climb or reach deep into a chute to free items. Ask for help.", es:"Los chutes se llenan rapido - nunca se suba ni meta el brazo profundo para liberar articulos. Pida ayuda." },
+  { en:"Watch finger placement on the AFE walls and totes - pinch points everywhere.", es:"Cuide donde pone los dedos en las paredes AFE y totes - hay puntos de pellizco en todas partes." },
+  { en:"Rotate between pack and rebin when offered - variety protects your body.", es:"Rote entre pack y rebin cuando se lo ofrezcan - la variedad protege su cuerpo." }],
+STANDARD_WORK:[
+  { en:"Count matters in multis: verify every item in the order before sealing. A missing item is a guaranteed contact.", es:"El conteo importa en multis: verifique cada articulo de la orden antes de sellar. Un articulo faltante es un contacto garantizado." },
+  { en:"Mixed order on your screen? Stop and re-scan - never ship a maybe.", es:"Orden mezclada en su pantalla? Pare y re-escanee - nunca envie un quizas." },
+  { en:"Use the right size box for the full set - cramming multis causes damage claims.", es:"Use la caja del tamano correcto para todo el conjunto - apretar multis causa reclamos por dano." }],
+PRODUCTIVITY:[
+  { en:"Work the wall left to right in order - hunting for lit slots wastes motion.", es:"Trabaje la pared de izquierda a derecha en orden - buscar luces al azar desperdicia movimiento." },
+  { en:"Keep dunnage and tape ahead of demand - your station should never wait on supplies.", es:"Mantenga relleno y cinta antes de la demanda - su estacion nunca debe esperar materiales." },
+  { en:"Flag chronic slow chutes to your PA - a pattern is a process problem, not a you problem.", es:"Reporte chutes cronicamente lentos a su PA - un patron es un problema de proceso, no suyo." }]};
+
+PACKS["slam"] = { SAFETY:[
+  { en:"SLAM lines move fast - keep loose clothing, badges and lanyards away from rollers and applicators.", es:"Las lineas SLAM se mueven rapido - mantenga ropa suelta, gafetes y cordones lejos de rodillos y aplicadores." },
+  { en:"Clear label jams only with the line stopped and lockout where required.", es:"Despeje atascos de etiquetas solo con la linea detenida y con bloqueo donde se requiera." },
+  { en:"Heavy packages rejected off the line land hard - keep feet clear of the reject chute.", es:"Los paquetes pesados rechazados caen fuerte - mantenga los pies lejos del chute de rechazo." }],
+STANDARD_WORK:[
+  { en:"A package without a scannable label does not leave this building. Rejects get fixed, not forced.", es:"Un paquete sin etiqueta escaneable no sale de este edificio. Los rechazos se arreglan, no se fuerzan." },
+  { en:"Check label placement: flat, no seams, no corners. A wrinkled label fails at the carrier.", es:"Revise la colocacion de la etiqueta: plana, sin costuras, sin esquinas. Una etiqueta arrugada falla con el transportista." },
+  { en:"Weight mismatch alerts are quality gold - investigate them, they catch wrong-item defects.", es:"Las alertas de peso son oro de calidad - investiguelas, atrapan defectos de articulo equivocado." }],
+PRODUCTIVITY:[
+  { en:"Keep label stock and printer ribbon staged - a printer change should take one minute, not ten.", es:"Tenga etiquetas y cinta de impresora listas - un cambio de impresora debe tomar un minuto, no diez." },
+  { en:"Watch the reject rate trend hourly - rising rejects mean an upstream problem worth calling out.", es:"Vigile la tendencia de rechazos cada hora - rechazos en aumento significan un problema rio arriba que vale reportar." },
+  { en:"Balance the lines: if your lane starves while another floods, tell your PA.", es:"Balancee las lineas: si su carril se vacia mientras otro se inunda, avise a su PA." }]};
+
+PACKS["package-sorter"] = { SAFETY:[
+  { en:"Never reach into a running sorter - packages weigh more than they look moving at belt speed.", es:"Nunca meta la mano en un clasificador en movimiento - los paquetes pesan mas de lo que parecen a velocidad de banda." },
+  { en:"Watch for falling packages at chute ends during heavy flow - stand to the side, not below.", es:"Cuidado con paquetes cayendo al final de los chutes durante flujo pesado - parese a un lado, no debajo." },
+  { en:"Report belt squeals, smoke smell, or grinding immediately - small mechanical issues become shutdowns.", es:"Reporte chirridos, olor a humo o rechinidos de inmediato - problemas mecanicos pequenos se vuelven paros." }],
+STANDARD_WORK:[
+  { en:"Right chute, right route: verify the destination label matches the lane before pushing volume.", es:"Chute correcto, ruta correcta: verifique que la etiqueta de destino coincida con el carril antes de empujar volumen." },
+  { en:"Full chute protocol: flag it, do not force packages past a full chute - that is how mis-sorts happen.", es:"Protocolo de chute lleno: marquelo, no fuerce paquetes - asi ocurren los envios mal clasificados." },
+  { en:"No-read packages go to the manual sort lane with the label up for rescanning.", es:"Paquetes sin lectura van al carril manual con la etiqueta hacia arriba para re-escaneo." }],
+PRODUCTIVITY:[
+  { en:"Keep chutes swept into containers continuously - letting them fill causes stop-start flow.", es:"Vacie los chutes a contenedores continuamente - dejar que se llenen causa flujo intermitente." },
+  { en:"Pre-stage empty gaylords and carts at your busiest chutes before the wave.", es:"Coloque gaylords y carritos vacios en sus chutes mas ocupados antes de la ola." },
+  { en:"Learn your peak chute pattern by CPT - the same lanes flood at the same times every day.", es:"Aprenda el patron de sus chutes por CPT - los mismos carriles se inundan a las mismas horas cada dia." }]};
+
+PACKS["ship-dock"] = { SAFETY:[
+  { en:"Trailer entry rules are absolute: chocked, locked, green light, dock plate seated. Every trailer, every time.", es:"Las reglas para entrar al trailer son absolutas: bloqueado, asegurado, luz verde, placa asentada. Cada trailer, cada vez." },
+  { en:"Build walls you would trust over your own head - because the next person unloading will be under them.", es:"Construya paredes en las que confiaria sobre su propia cabeza - porque la siguiente persona descargando estara debajo." },
+  { en:"Fluid loading means packages overhead - hard stop if anyone else enters your trailer.", es:"Carga fluida significa paquetes arriba - pare de inmediato si alguien mas entra a su trailer." }],
+STANDARD_WORK:[
+  { en:"Scan every package to the trailer. A missed scan is a lost package to the customer.", es:"Escanee cada paquete al trailer. Un escaneo perdido es un paquete perdido para el cliente." },
+  { en:"Wall integrity: heavy on bottom, light on top, no gaps. A shifted wall is damage and injury.", es:"Integridad de pared: pesado abajo, ligero arriba, sin huecos. Una pared movida es dano y lesion." },
+  { en:"CPT is a promise: know your critical pull time and escalate the moment a trailer risks missing it.", es:"El CPT es una promesa: conozca su hora critica y escale en cuanto un trailer arriesgue perderla." }],
+PRODUCTIVITY:[
+  { en:"Load continuously, not in bursts - a steady 20 seconds per package beats sprint-and-stall.", es:"Cargue continuamente, no en rafagas - 20 segundos constantes por paquete ganan al sprint con paros." },
+  { en:"Keep your door area staged: next gaylord in position before the current one empties.", es:"Mantenga su area de puerta lista: el siguiente gaylord en posicion antes de que se vacie el actual." },
+  { en:"Communicate door swaps early with the yard - an empty door is wasted labor.", es:"Comunique cambios de puerta temprano con el patio - una puerta vacia es labor desperdiciada." }]};
+
+PACKS["ob-ps"] = { SAFETY:[
+  { en:"Jackpot and PS areas collect odd-size and damaged freight - assume nothing about weight or contents.", es:"Las areas de jackpot y PS acumulan carga extrana y danada - no asuma nada sobre peso o contenido." },
+  { en:"Leaking or hazmat-suspect packages get isolated, not investigated. Follow the spill process.", es:"Paquetes con fugas o sospecha de hazmat se aislan, no se investigan. Siga el proceso de derrames." },
+  { en:"Keep your PS station organized - a cluttered problem area creates its own problems.", es:"Mantenga su estacion de PS organizada - un area desordenada crea sus propios problemas." }],
+STANDARD_WORK:[
+  { en:"Every package here has a customer waiting: research fast, but resolve right.", es:"Cada paquete aqui tiene un cliente esperando: investigue rapido, pero resuelva bien." },
+  { en:"Relabel-and-reinduct beats rebox when the contents are intact - choose the least invasive fix.", es:"Re-etiquetar y re-inductar gana a re-empacar cuando el contenido esta intacto - elija la solucion menos invasiva." },
+  { en:"Document defect sources: pack station, SLAM line, sorter lane. Your data fixes the process.", es:"Documente el origen de los defectos: estacion de pack, linea SLAM, carril del sorter. Sus datos arreglan el proceso." }],
+PRODUCTIVITY:[
+  { en:"Work jackpot by CPT priority - the package due in 40 minutes beats the one due tomorrow.", es:"Trabaje el jackpot por prioridad de CPT - el paquete que sale en 40 minutos gana al de manana." },
+  { en:"Batch identical fixes: ten no-label packages resolve faster as a set than one by one.", es:"Agrupe soluciones identicas: diez paquetes sin etiqueta se resuelven mas rapido en conjunto que uno por uno." },
+  { en:"Escalate volume spikes early - jackpot flooding means something upstream broke.", es:"Escale los picos de volumen temprano - un jackpot inundado significa que algo rio arriba se rompio." }]};
+</script>
+
+<script>
+// ===== DEPARTMENT CONTENT PACKS: SUPPORT =====
+PACKS["icqa"] = { SAFETY:[
+  { en:"Counting in bins means hands in bins: look first, reach second. Sharp and broken items hide everywhere.", es:"Contar en bins significa manos en bins: mire primero, meta la mano despues. Articulos filosos y rotos se esconden en todas partes." },
+  { en:"Use the step ladder for high bins, and keep three points of contact - never freehand a top shelf count.", es:"Use la escalera para bins altos y mantenga tres puntos de contacto - nunca cuente un estante alto sin apoyo." },
+  { en:"Announce yourself in aisles where pickers are working - two people, one aisle needs communication.", es:"Anunciese en pasillos donde hay pickers trabajando - dos personas en un pasillo necesitan comunicacion." }],
+STANDARD_WORK:[
+  { en:"Count what is there, not what should be there. Your accuracy is the building's source of truth.", es:"Cuente lo que hay, no lo que deberia haber. Su precision es la fuente de verdad del edificio." },
+  { en:"Every adjustment needs a reason code - the code drives root cause, the count just fixes today.", es:"Cada ajuste necesita un codigo de razon - el codigo impulsa la causa raiz, el conteo solo arregla hoy." },
+  { en:"Found an item in the wrong bin? That is an IOL - process it fully, do not just move it.", es:"Encontro un articulo en el bin equivocado? Eso es un IOL - proceselo completamente, no solo lo mueva." }],
+PRODUCTIVITY:[
+  { en:"Work your count queue in path order - aisle-hopping doubles your walk time.", es:"Trabaje su cola de conteos en orden de ruta - saltar entre pasillos duplica su caminata." },
+  { en:"Simple bins first when you are learning; complex multi-ASIN bins when you are warmed up.", es:"Bins simples primero cuando esta aprendiendo; bins complejos multi-ASIN cuando ya esta en ritmo." },
+  { en:"Flag chronic problem bins (overstuffed, damaged, mislabeled) - fixing the bin fixes future counts.", es:"Reporte bins problematicos cronicos (sobrellenados, danados, mal etiquetados) - arreglar el bin arregla conteos futuros." }]};
+
+PACKS["noncon"] = { SAFETY:[
+  { en:"Non-con means heavy and awkward: team lift is the default here, not the exception.", es:"Non-con significa pesado e incomodo: levantar en equipo es lo normal aqui, no la excepcion." },
+  { en:"Watch pinch points moving large items through doorways and around corners - go slow, communicate.", es:"Cuidado con puntos de pellizco al mover articulos grandes por puertas y esquinas - vaya despacio, comunique." },
+  { en:"Never stack non-con freight above safe height - big items fall big.", es:"Nunca apile carga non-con arriba de la altura segura - los articulos grandes caen fuerte." }],
+STANDARD_WORK:[
+  { en:"Every non-con item still needs a scan at every move - size does not exempt it from tracking.", es:"Cada articulo non-con necesita escaneo en cada movimiento - el tamano no lo exime del rastreo." },
+  { en:"Label placement matters double on big items: visible, flat, and where the next process can find it.", es:"La colocacion de etiquetas importa doble en articulos grandes: visible, plana y donde el siguiente proceso la encuentre." },
+  { en:"Stage non-con in its marked lanes only - it blocks aisles and PIT paths anywhere else.", es:"Coloque non-con solo en sus carriles marcados - en cualquier otro lugar bloquea pasillos y rutas de PIT." }],
+PRODUCTIVITY:[
+  { en:"Plan your route before you move a big item: know your endpoint and your path before lifting.", es:"Planee su ruta antes de mover un articulo grande: conozca su destino y su camino antes de levantar." },
+  { en:"Keep non-con flowing continuously - a backed-up non-con lane blocks the whole dock fast.", es:"Mantenga el non-con fluyendo continuamente - un carril non-con congestionado bloquea todo el muelle rapido." },
+  { en:"Two trained people moving steadily beat four untrained people improvising. Know the process.", es:"Dos personas entrenadas moviendo constante ganan a cuatro improvisando. Conozca el proceso." }]};
+
+PACKS["waterspider"] = { SAFETY:[
+  { en:"You cross more PIT lanes than anyone in the building - eye contact with every driver, every crossing.", es:"Usted cruza mas carriles de PIT que nadie en el edificio - contacto visual con cada conductor, cada cruce." },
+  { en:"Loaded carts block your sight line: push at a speed where you can stop instantly.", es:"Los carritos cargados bloquean su vision: empuje a una velocidad donde pueda parar al instante." },
+  { en:"Stack supplies stable and below eye level on your cart - you need to see over your load.", es:"Apile los materiales estables y bajo el nivel de los ojos en su carrito - necesita ver por encima de su carga." }],
+STANDARD_WORK:[
+  { en:"Follow your route on schedule, not on request order - the loop keeps everyone fed fairly.", es:"Siga su ruta segun horario, no por orden de peticion - el circuito mantiene a todos surtidos justamente." },
+  { en:"Standard quantities at every drop: consistent restock beats hero restock.", es:"Cantidades estandar en cada parada: el resurtido consistente gana al resurtido heroe." },
+  { en:"Report empty supply stock (boxes, tape, totes) to your PA before the floor feels it.", es:"Reporte inventario de materiales vacio (cajas, cinta, totes) a su PA antes de que el piso lo sienta." }],
+PRODUCTIVITY:[
+  { en:"You set the pace of every station you feed - a starved line loses more rate than any single associate can.", es:"Usted marca el ritmo de cada estacion que alimenta - una linea sin material pierde mas ritmo que cualquier asociado." },
+  { en:"Learn each station's burn rate: heavy stations need double drops at peak.", es:"Aprenda el consumo de cada estacion: las estaciones pesadas necesitan doble entrega en pico." },
+  { en:"Consolidate trips: full cart out, empties and trash back. Never travel empty.", es:"Consolide viajes: carrito lleno de ida, vacios y basura de regreso. Nunca viaje vacio." }]};
+
+PACKS["pit"] = { SAFETY:[
+  { en:"Pre-shift inspection is not optional: forks, horn, lights, brakes, battery. Tag out anything that fails.", es:"La inspeccion pre-turno no es opcional: horquillas, claxon, luces, frenos, bateria. Etiquete y retire lo que falle." },
+  { en:"Pedestrians always have the right of way. Slow down at every intersection, horn at every blind corner.", es:"Los peatones siempre tienen el derecho de paso. Baje la velocidad en cada interseccion, claxon en cada esquina ciega." },
+  { en:"Capacity plates are law: know your load weight before lifting. An overloaded PIT tips.", es:"Las placas de capacidad son ley: conozca el peso de su carga antes de levantar. Un PIT sobrecargado se voltea." }],
+STANDARD_WORK:[
+  { en:"Forks low when traveling, loads tilted back, speed to conditions. Every trip, loaded or not.", es:"Horquillas bajas al viajar, cargas inclinadas hacia atras, velocidad segun condiciones. Cada viaje, con o sin carga." },
+  { en:"Park it right: forks down, key out, in designated areas only. An abandoned PIT is a violation.", es:"Estacione bien: horquillas abajo, llave fuera, solo en areas designadas. Un PIT abandonado es una violacion." },
+  { en:"Battery change and charging stations have their own PPE and process - shortcuts here cause burns.", es:"El cambio de bateria y la carga tienen su propio EPP y proceso - los atajos aqui causan quemaduras." }],
+PRODUCTIVITY:[
+  { en:"Plan combined moves: take a pallet, bring a pallet. Deadheading wastes half your shift.", es:"Planee movimientos combinados: lleve una tarima, traiga una tarima. Viajar vacio desperdicia medio turno." },
+  { en:"Stage your next three moves mentally - a driver who knows the next move never idles.", es:"Planee sus siguientes tres movimientos mentalmente - un conductor que sabe su siguiente movimiento nunca esta parado." },
+  { en:"Report congestion patterns to your PA - the same jammed intersection every day is a layout problem.", es:"Reporte patrones de congestion a su PA - la misma interseccion atascada cada dia es un problema de diseno." }]};
+
+PACKS["amnesty"] = { SAFETY:[
+  { en:"Amnesty items on the floor stop robots AND people - approach floor items per the amnesty process only.", es:"Los articulos de amnesty en el piso detienen robots Y personas - acerquese a articulos en el piso solo segun el proceso de amnesty." },
+  { en:"Never enter the robotic field without following the safety vest and access process completely.", es:"Nunca entre al campo robotico sin seguir completamente el proceso de chaleco y acceso de seguridad." },
+  { en:"Report barrier damage or field access issues immediately - the fence is the safety system.", es:"Reporte danos a las barreras o problemas de acceso de inmediato - la cerca es el sistema de seguridad." }],
+STANDARD_WORK:[
+  { en:"Every recovered item gets scanned back into the system - an unscanned recovery is still lost inventory.", es:"Cada articulo recuperado se escanea de vuelta al sistema - una recuperacion sin escanear sigue siendo inventario perdido." },
+  { en:"Damaged recoveries go to damage land, sellable recoveries go back to flow - judge honestly.", es:"Recuperaciones danadas van a danos, las vendibles regresan al flujo - juzgue honestamente." },
+  { en:"Log the location where items fell - patterns show which stations or pods have problems.", es:"Registre donde cayeron los articulos - los patrones muestran que estaciones o pods tienen problemas." }],
+PRODUCTIVITY:[
+  { en:"Batch your field entries - one trip for five items beats five trips for one.", es:"Agrupe sus entradas al campo - un viaje por cinco articulos gana a cinco viajes por uno." },
+  { en:"Clear amnesty queues before peak waves - a clean floor at wave start prevents mid-wave stops.", es:"Limpie las colas de amnesty antes de las olas pico - un piso limpio al inicio previene paros a media ola." },
+  { en:"Track your most common fallen ASINs - report repeat offenders for slotting review.", es:"Rastree sus ASINs caidos mas comunes - reporte reincidentes para revision de ubicacion." }]};
+
+PACKS["transship"] = { SAFETY:[
+  { en:"Trans-ship freight is mixed and unpredictable - inspect every pallet before moving it.", es:"La carga de trans-envio es mixta e impredecible - inspeccione cada tarima antes de moverla." },
+  { en:"Fluid loading and unloading rules apply here fully: never work under suspended or leaning freight.", es:"Las reglas de carga fluida aplican por completo: nunca trabaje bajo carga suspendida o inclinada." },
+  { en:"Dock safety basics never take a day off: green light, chocks, plate, then enter.", es:"Los basicos de seguridad del muelle nunca descansan: luz verde, calzas, placa, y luego entre." }],
+STANDARD_WORK:[
+  { en:"Destination accuracy is everything: freight to the wrong FC costs days, not minutes.", es:"La precision de destino lo es todo: carga al FC equivocado cuesta dias, no minutos." },
+  { en:"Scan at every handoff - trans-ship freight crosses more hands than any other flow.", es:"Escanee en cada entrega - la carga de trans-envio pasa por mas manos que cualquier otro flujo." },
+  { en:"Seal and document every outbound trans-ship trailer per process - the receiving FC depends on it.", es:"Selle y documente cada trailer de salida segun el proceso - el FC receptor depende de ello." }],
+PRODUCTIVITY:[
+  { en:"Consolidate by destination early - sorting at the door is too late.", es:"Consolide por destino temprano - clasificar en la puerta es demasiado tarde." },
+  { en:"Keep trans-ship lanes clean and current - aged freight in lanes becomes lost freight.", es:"Mantenga los carriles de trans-envio limpios y al dia - la carga vieja en carriles se vuelve carga perdida." },
+  { en:"Coordinate with ISS on trailer schedules - a loaded trailer with no pickup is stored, not shipped.", es:"Coordine con ISS los horarios de trailers - un trailer cargado sin recoleccion esta almacenado, no enviado." }]};
+
+// ===== DEPARTMENT REGISTRY =====
+var DEPTS = [
+ { id:"inbound-dock",  g:"inbound",  em:"&#128666;", name:"Inbound Dock / Unload", es:"Muelle de Entrada / Descarga" },
+ { id:"pallet-receive",g:"inbound",  em:"&#128230;", name:"Pallet Receive", es:"Recibo de Tarimas" },
+ { id:"decant",        g:"inbound",  em:"&#128229;", name:"Decant", es:"Decant", pools:"DECANT", sit:"DECANT" },
+ { id:"each-receive",  g:"inbound",  em:"&#128209;", name:"Each Receive (ER)", es:"Recibo por Unidad" },
+ { id:"prep",          g:"inbound",  em:"&#127873;", name:"Prep", es:"Preparacion" },
+ { id:"ib-ps",         g:"inbound",  em:"&#128295;", name:"Inbound Problem Solve", es:"Solucion de Problemas - Entrada" },
+ { id:"iss",           g:"inbound",  em:"&#128203;", name:"ISS / Dock Clerk", es:"Servicios de Apoyo de Entrada" },
+ { id:"stow",          g:"stow",     em:"&#128218;", name:"Stow", es:"Almacenaje", pools:"STOW", sit:"STOW", floors:true },
+ { id:"pick",          g:"outbound", em:"&#128717;", name:"Pick", es:"Seleccion" },
+ { id:"induct",        g:"outbound", em:"&#10145;&#65039;", name:"Induct", es:"Induccion" },
+ { id:"rebin",         g:"outbound", em:"&#129513;", name:"Rebin / Sort", es:"Rebin / Clasificacion" },
+ { id:"pack-singles",  g:"outbound", em:"&#128740;", name:"Pack Singles", es:"Empaque Individual" },
+ { id:"pack-multis",   g:"outbound", em:"&#128230;", name:"Pack Multis (AFE)", es:"Empaque Multiple" },
+ { id:"slam",          g:"outbound", em:"&#127991;&#65039;", name:"SLAM", es:"SLAM - Etiquetado" },
+ { id:"package-sorter",g:"outbound", em:"&#128257;", name:"Package Sorter", es:"Clasificador de Paquetes" },
+ { id:"ship-dock",     g:"outbound", em:"&#128667;", name:"Ship Dock / Outbound", es:"Muelle de Salida" },
+ { id:"ob-ps",         g:"outbound", em:"&#129520;", name:"Outbound Problem Solve", es:"Solucion de Problemas - Salida" },
+ { id:"icqa",          g:"support",  em:"&#128269;", name:"ICQA", es:"Control de Inventario y Calidad" },
+ { id:"noncon",        g:"support",  em:"&#128721;", name:"Non-Con", es:"No Transportable" },
+ { id:"waterspider",   g:"support",  em:"&#128167;", name:"Waterspider", es:"Waterspider - Surtidor" },
+ { id:"pit",           g:"support",  em:"&#128668;", name:"PIT / PG Drivers", es:"Conductores PIT" },
+ { id:"amnesty",       g:"support",  em:"&#129302;", name:"Amnesty / Floor Monitor", es:"Amnesty / Monitor de Piso", extra:true },
+ { id:"transship",     g:"support",  em:"&#128260;", name:"Trans-ship", es:"Trans-envio", extra:true }
+];
+var GROUPS = [
+ { key:"inbound",  label:"&#128666; Inbound / Entrada",  cls:"g-inbound",  acc:"acc-inbound" },
+ { key:"stow",     label:"&#128218; Stow / Almacenaje",  cls:"g-stow",     acc:"acc-stow" },
+ { key:"outbound", label:"&#128230; Outbound / Salida",  cls:"g-outbound", acc:"acc-outbound" },
+ { key:"support",  label:"&#129309; Support / Apoyo",    cls:"g-support",  acc:"acc-support" }
+];
+</script>
+
+<script>
+// ================= ENGINE =================
+var LABELS = {
+ "q-hot":{label:"Hot Weather",em:"&#127774;"},
+ "q-cold":{label:"Cold Weather",em:"&#10052;&#65039;"},
+ "q-power":{label:"Power Outage Risk",em:"&#9889;"},
+ "q-peak":{label:"Peak / High Volume",em:"&#128200;"},
+ "q-newhires":{label:"New Hires Today",em:"&#127891;"},
+ "q-audit":{label:"Audit / Visit Day",em:"&#128203;"},
+ "q-injury":{label:"Recent Injury / Near Miss",em:"&#9888;&#65039;"},
+ "q-weather":{label:"Severe Weather",em:"&#127785;&#65039;"},
+ "q-dropzone":{label:"Drop Zones Full",em:"&#128230;"},
+ "q-rate":{label:"Behind on Rate",em:"&#9201;&#65039;"},
+ "q-quality":{label:"Quality Focus",em:"&#127919;"}
+};
+var CAT_ORDER = ["SAFETY","QUALITY","STANDARD_WORK","PRODUCTIVITY","HOUSEKEEPING","TEAMWORK","WELLNESS","ENGAGEMENT"];
+var CAT_NAMES = {SAFETY:["Safety","Seguridad"],QUALITY:["Quality","Calidad"],STANDARD_WORK:["Standard Work","Trabajo Estandar"],
+ PRODUCTIVITY:["Productivity","Productividad"],HOUSEKEEPING:["Housekeeping / 5S","Orden y Limpieza"],
+ TEAMWORK:["Teamwork","Trabajo en Equipo"],WELLNESS:["Wellness","Bienestar"],ENGAGEMENT:["Engagement","Participacion"]};
+
+var current = null, shuffleOff = 0;
+
+function getPools(d){
+  if(d.pools === "DECANT") return DECANT_POOLS;
+  if(d.pools === "STOW")   return STOW_POOLS;
+  var m = {SAFETY: (PACKS[d.id] && PACKS[d.id].SAFETY) || COMMON.SAFETY};
+  var p = PACKS[d.id] || {};
+  for(var k in p){ m[k] = p[k]; }
+  m.TEAMWORK = COMMON.TEAMWORK; m.WELLNESS = COMMON.WELLNESS;
+  return m;
+}
+function getSit(d){
+  var src = d.sit === "DECANT" ? DECANT_SIT : d.sit === "STOW" ? STOW_SIT : null;
+  var out = [];
+  if(src){
+    for(var k in src){
+      var lb = LABELS[k] || {label:k, em:"&#128204;"};
+      out.push({id:k, label:lb.label, em:lb.em, pts:src[k]});
+    }
+  } else {
+    for(var k2 in COMMON_SIT){
+      out.push({id:k2, label:COMMON_SIT[k2].label, em:COMMON_SIT[k2].em, pts:COMMON_SIT[k2].pts});
+    }
+  }
+  return out;
+}
+function dayOfYear(){
+  var now = new Date(), start = new Date(now.getFullYear(),0,0);
+  return Math.floor((now - start) / 86400000);
+}
+function fmtDate(){
+  var days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  var dias=["domingo","lunes","martes","miercoles","jueves","viernes","sabado"];
+  var n=new Date();
+  return {en: days[n.getDay()]+", "+(n.getMonth()+1)+"/"+n.getDate()+"/"+n.getFullYear(),
+          es: dias[n.getDay()]};
+}
+
+// ---------- landing ----------
+function buildLanding(){
+  var host = document.getElementById("groups");
+  host.innerHTML = "";
+  GROUPS.forEach(function(g){
+    var t = document.createElement("div");
+    t.className = "gtitle "+g.cls; t.innerHTML = g.label;
+    host.appendChild(t);
+    var grid = document.createElement("div"); grid.className = "dgrid";
+    DEPTS.filter(function(d){return d.g===g.key;}).forEach(function(d){
+      var c = document.createElement("div"); c.className = "dcard";
+      c.innerHTML = '<span class="accent '+g.acc+'"></span><span class="em">'+d.em+'</span>'+
+        '<div><h3>'+d.name+(d.extra?' <small style="color:#adb5bd">(extra)</small>':'')+'</h3><div class="es">'+d.es+'</div></div>';
+      c.onclick = function(){ openDept(d.id); };
+      grid.appendChild(c);
+    });
+    host.appendChild(grid);
+  });
+}
+
+// ---------- meeting ----------
+function openDept(id){
+  current = DEPTS.find(function(d){return d.id===id;});
+  shuffleOff = 0;
+  document.getElementById("landing").classList.add("hidden");
+  document.getElementById("meeting").classList.remove("hidden");
+  document.getElementById("backBtn").classList.remove("hidden");
+  document.getElementById("mEmoji").innerHTML = current.em;
+  document.getElementById("mName").textContent = current.name + " Startup Meeting";
+  document.getElementById("mNameEs").textContent = "Reunion de inicio - " + current.es;
+  var f = fmtDate();
+  document.getElementById("mDate").textContent = f.en + " / " + f.es;
+  document.getElementById("mShift").textContent = "Startup Meeting / Reunion de Inicio";
+  var mg = document.getElementById("mgrIn");
+  mg.value = localStorage.getItem("hub-mgr-"+id) || "";
+  mg.oninput = function(){ localStorage.setItem("hub-mgr-"+id, mg.value); };
+  document.getElementById("noteIn").value = "";
+  document.getElementById("noteIn").oninput = render;
+  buildFloors();
+  buildChips();
+  render();
+  window.scrollTo(0,0);
+}
+function goHome(){
+  document.getElementById("meeting").classList.add("hidden");
+  document.getElementById("backBtn").classList.add("hidden");
+  document.getElementById("landing").classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+function buildFloors(){
+  var panel = document.getElementById("floorPanel"), row = document.getElementById("floorRow");
+  row.innerHTML = "";
+  if(!current.floors){ panel.classList.add("hidden"); return; }
+  panel.classList.remove("hidden");
+  ["P-1","P-2","P-3","P-4"].forEach(function(fl){
+    var l = document.createElement("label"); l.className = "floor";
+    l.innerHTML = '<input type="checkbox"><span>'+fl+'</span><input type="text" maxlength="3" placeholder="###" title="Active buffer">';
+    var cb = l.querySelector('input[type=checkbox]');
+    cb.onchange = function(){ l.classList.toggle("on", cb.checked); render(); };
+    l.querySelector('input[type=text]').oninput = render;
+    row.appendChild(l);
+  });
+}
+function buildChips(){
+  var row = document.getElementById("chipRow"); row.innerHTML = "";
+  getSit(current).forEach(function(s){
+    var l = document.createElement("label"); l.className = "chip";
+    l.innerHTML = '<input type="checkbox" data-sid="'+s.id+'"><span>'+s.em+'</span> '+s.label;
+    var cb = l.querySelector("input");
+    cb.onchange = function(){ l.classList.toggle("on", cb.checked); render(); };
+    row.appendChild(l);
+  });
+}
+function card(cat, txt, cls){
+  return '<div class="pcardm '+(cls||'')+'"><div class="cat">'+cat+'</div><div class="txt">'+txt+'</div></div>';
+}
+function render(){
+  if(!current) return;
+  var pools = getPools(current);
+  var seed = dayOfYear() + shuffleOff;
+  var en = "", es = "";
+
+  // stow floor announcement
+  if(current.floors){
+    var act = [];
+    document.querySelectorAll("#floorRow .floor").forEach(function(l){
+      if(l.querySelector('input[type=checkbox]').checked){
+        var b = l.querySelector('input[type=text]').value;
+        act.push(l.querySelector("span").textContent + (b ? " (buffer " + b + ")" : ""));
+      }
+    });
+    if(act.length){
+      en += card("Today's Floors", "Active stow floors today: <b>"+act.join(", ")+"</b>. Check your labor share board for your assignment.", "floorinfo");
+      es += card("Pisos de Hoy", "Pisos de almacenaje activos hoy: <b>"+act.join(", ")+"</b>. Revise el tablero de labor para su asignacion.", "floorinfo");
+    }
+  }
+
+  // daily rotating points
+  var cats = CAT_ORDER.filter(function(c){ return pools[c] && pools[c].length; });
+  cats.forEach(function(c, i){
+    var pool = pools[c], pt = pool[(seed + i*3) % pool.length];
+    var nm = CAT_NAMES[c] || [c, c];
+    en += card(nm[0], pt.en);
+    es += card(nm[1], pt.es);
+  });
+
+  // situational
+  document.querySelectorAll("#chipRow input:checked").forEach(function(cb){
+    var s = getSit(current).find(function(x){ return x.id === cb.dataset.sid; });
+    if(s) s.pts.forEach(function(p){
+      en += card("Situational", p.en, "sit");
+      es += card("Situacional", p.es, "sit");
+    });
+  });
+
+  // custom note
+  var note = document.getElementById("noteIn").value.trim();
+  if(note){
+    en += card("Today's Announcement", note, "sit");
+    es += card("Anuncio de Hoy", note, "sit");
+  }
+
+  document.getElementById("ptsEn").innerHTML = en;
+  document.getElementById("ptsEs").innerHTML = es;
+}
+function reshuffle(){ shuffleOff += 7; render(); }
+
+// ---------- boot ----------
+(function(){
+  var f = fmtDate();
+  document.getElementById("hdrDate").innerHTML = f.en + "<small>Reunion de inicio diaria</small>";
+  buildLanding();
+})();
+</script>
+</body>
+</html>
